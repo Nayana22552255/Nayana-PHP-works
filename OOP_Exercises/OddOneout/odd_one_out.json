@@ -1,0 +1,21 @@
+[
+    {
+        "category": "fruits",
+        "items": [
+            "banana",
+            "apple",
+            "carrot",
+            "mango"
+        ],
+        "odd": "carrot"
+    },
+    {
+        "category": "vehicle",
+        "items": [
+            "car",
+            "bike",
+            "boat"
+        ],
+        "odd": "boat"
+    }
+]

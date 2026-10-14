@@ -1,0 +1,14 @@
+{
+    "anaswara": {
+        "username": "anaswara",
+        "password_hash": "$2y$12$NerDgECHPjRWglM.B5tjEumb3PzJmHagBQev5hPGJqodg1z.OEpHe"
+    },
+    "nayana": {
+        "username": "nayana",
+        "password_hash": "$2y$12$5TA2gs6j0Nn.9NsloXKw/Ov6K4S4NiU2KsVxUunJ7MQEUwvn0adCy"
+    },
+    "ichigo_kurosaki": {
+        "username": "Ichigo_Kurosaki",
+        "password_hash": "$2y$12$R/vzoU9dy13V6kcujY8Zd.EyJHSmAnChoRDJhCn69a4bJkkzFolyu"
+    }
+}

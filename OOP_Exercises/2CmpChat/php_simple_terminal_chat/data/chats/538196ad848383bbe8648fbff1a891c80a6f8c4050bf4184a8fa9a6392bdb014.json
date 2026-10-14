@@ -1,0 +1,35 @@
+[
+    {
+        "from": "nayana",
+        "to": "anaswara",
+        "message": "hello",
+        "time": "2026-10-13 17:00:03"
+    },
+    {
+        "from": "nayana",
+        "to": "anaswara",
+        "message": "how are you?",
+        "time": "2026-10-13 17:00:11"
+    },
+   
+    
+    {
+        "from": "anaswara",
+        "to": "nayana",
+        "message": "hi nayana , i am fine",
+        "time": "2026-10-13 17:06:09"
+    },
+    {
+        "from": "anaswara",
+        "to": "nayana",
+        "message": "thank you/",
+        "time": "2026-10-13 17:06:17"
+    },
+   
+    {
+        "from": "nayana",
+        "to": "anaswara",
+        "message": "Hiii anaswaraa",
+        "time": "2026-10-14 03:50:21"
+    }
+]

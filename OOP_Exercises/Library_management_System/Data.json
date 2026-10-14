@@ -1,0 +1,38 @@
+{
+    "books":[
+        {
+            "bookid":101,
+            "title":"PHP Programming",
+            "author": "Jhon",
+            "isavailable":true
+        },
+        {
+            "bookid":101,
+            "title":"Python Programming",
+            "author": "Jacob",
+            "isavailable":false
+        },
+        {
+            "bookid":103,
+            "title": "Java Programming",
+            "author": "Mariya",
+            "isavailable":true
+        }
+    ],
+
+    "members":[
+        {
+            "memberid":1,
+            "name":"Nayana"
+        },
+        {
+             "memberid":2,
+            "name":"Anaswara"
+        },
+        {
+             "memberid":3,
+            "name":"Gopika"
+        }
+            
+    ]
+}

@@ -1,0 +1,65 @@
+{
+    "students":[
+        {
+            "id":101,
+            "name":"nayana",
+            "email":"nayana@gmail.com",
+            "department":"computer science"
+        
+
+        },
+        {
+            "id":102,
+            "name":"anaswara",
+            "email":"anaswara@gmail.com",
+            "department":"computer science"
+        }
+    ],
+
+    "instructors" :[
+        {
+            "id":10001,
+            "name":"rageesh",
+            "email":"rageesh@gmail.com",
+            "Specialization":"Data science and AI"
+
+        },
+        {
+            "id":10002,
+            "name":"jhon",
+            "email":"jhon@gmail.com",
+            "Specialization":"Python Django"
+        }
+    ],
+    "courses":[
+        {
+            "courseid":"AC001",
+            "coursename":"Data science",
+            "credits":2,
+            "instructorid":"10001",
+            "duration":"6 months"
+        },
+        {
+           "courseid":"BCO1",
+            "coursename":"pyhthon fullstack",
+            "credits":4,
+            "instructorid":"10002",
+            "duration":"6 months"  
+        }
+    ],
+    "registrations":[
+        {
+            "registrationid":"1",
+            "studentid":"101",
+            "courseid":"AC001"
+            
+
+        },
+        {
+             "registrationid":"2",
+            "studentid":"102",
+            "courseid":"BCO1"
+            
+        }
+    ]
+}

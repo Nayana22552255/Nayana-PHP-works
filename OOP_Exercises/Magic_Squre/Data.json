@@ -1,0 +1,18 @@
+{
+    "players": [
+        {
+            "name": "nayana"
+        }
+    ],
+    "Scores": [
+        {
+            "name": "nayana",
+            "score": 10,
+            "attempts": 1
+        }
+    ],
+    "Settings": {
+        "Size": 3,
+        "attempts": 3
+    }
+}

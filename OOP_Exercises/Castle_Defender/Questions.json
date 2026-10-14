@@ -1,0 +1,43 @@
+[
+    {
+        "question": "what is  5 * 5 ?",
+        "answer": "25"
+    },
+    {
+        "question": "what is the capital of india ?",
+        "answer":"delhi"
+    },
+    {
+        "question": "how many days are in a week ?",
+        "answer":"7"
+
+    },
+    {
+        "question":"what is the opposite of hot ?",
+        "answer":"cold"
+    },
+    {
+        "question":"how many months are in a year ?",
+        "answer":"12"
+    },
+    {
+        "question":"what is the color of the sky ?",
+        "answer":"blue"
+    },
+    {
+        "question":"what is the largest mammal ?",
+        "answer":"blue whale"
+    },
+    {
+        "question":"what is the smallest prime number ?",
+        "answer":"2"
+    },
+    {
+        "question":"what is the boiling point of water in Celsius ?",
+        "answer":"100"
+    },
+    {
+        "question":"what is the currency of the United States ?",
+        "answer":"dollar"
+    }
+]
