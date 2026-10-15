@@ -49,4 +49,6 @@
 48. Towers of hanoi
 49. traits
 50. WS puzzle
+51. flames
+52. Bingo 
 
