@@ -52,3 +52,5 @@
 51. flames
 52. Bingo 
 53. Number Sliding game
+54. Tango game
+
