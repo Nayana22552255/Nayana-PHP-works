@@ -3,10 +3,10 @@
 
 class SOSGame
 {
-    private array $board;
-    private int $size = 3;
-    private array $scores;
-    private int $currentPlayer = 1;
+    private  $board;
+    private  $size = 5;
+    private  $scores;
+    private  $currentPlayer = 1;
 
     //  Initialize the game
     public function __construct()
@@ -24,12 +24,12 @@ class SOSGame
     }
 
     //  Display the board
-    public function displayBoard(): void
+    public function displayBoard()
     {
-        echo "\n    1   2   3\n";
+        echo "\n    1   2   3   4   5\n";
 
         for ($row = 0; $row < $this->size; $row++) {
-            echo "  +---+---+---+\n";
+            echo "  +---+---+---+---+---+\n";
             echo ($row + 1) . " |";
 
             for ($col = 0; $col < $this->size; $col++) {
@@ -39,13 +39,13 @@ class SOSGame
             echo "\n";
         }
 
-        echo "  +---+---+---+\n";
+        echo "  +---+---+---+---+---+\n";
         echo "Player 1 Score: " . $this->scores[1] . "\n";
         echo "Player 2 Score: " . $this->scores[2] . "\n";
     }
 
     //  Count all SOS sequences on the board
-    private function countSOS(): int
+    private function countSOS()
     {
         $count = 0;
 
@@ -92,17 +92,15 @@ class SOSGame
     }
 
     //  Play one move
-    private function makeMove(
-        int $row,
-        int $col,
-        string $letter
-    ): bool {
+    private function makeMove($row, $col, $letter ) 
+    {
 
         // Check board position
         if (
             $row < 0 || $row >= $this->size ||
             $col < 0 || $col >= $this->size
-        ) {
+        ) 
+        {
             echo "Invalid position! Choose a number from 1 to 3.\n";
             return false;
         }
@@ -122,22 +120,22 @@ class SOSGame
         // Count sequences after placing the letter
         $after = $this->countSOS();
 
-        // Award points for newly created SOS sequences
-        $points = $after - $before;
+        // Award pos for newly created SOS sequences
+        $pos = $after - $before;
 
-        if ($points > 0) {
-            $this->scores[$this->currentPlayer] += $points;
+        if ($pos > 0) {
+            $this->scores[$this->currentPlayer] += $pos;
 
             echo "SOS formed! Player "
                 . $this->currentPlayer
-                . " earns " . $points . " point(s)!\n";
+                . " earns " . $pos . " po(s)!\n";
         }
 
         return true;
     }
 
     // : Check whether the board is full
-    private function isBoardFull(): bool
+    private function isBoardFull()
     {
         for ($row = 0; $row < $this->size; $row++) {
             for ($col = 0; $col < $this->size; $col++) {
@@ -151,7 +149,7 @@ class SOSGame
     }
 
     //  Display the final result
-    private function showWinner(): void
+    private function showWinner()
     {
         echo "\n========== GAME OVER ==========\n";
         echo "Player 1 Score: " . $this->scores[1] . "\n";
@@ -167,7 +165,7 @@ class SOSGame
     }
 
     //  Start and control the game
-    public function start(): void
+    public function start()
     {
         echo "===== SOS GAME =====\n";
         echo "Enter row and column (1 to 3).\n";
@@ -198,14 +196,14 @@ class SOSGame
                 continue;
             }
 
-            $row = (int)$rowInput - 1;
-            $col = (int)$colInput - 1;
+            $row = $rowInput - 1;
+            $col = $colInput - 1;
 
-            if ($this->makeMove($row, $col, $letter)) {
+            if ($this->makeMove($row, $col, $letter)) 
+                {
 
                 // Switch players after a valid move
-                $this->currentPlayer =
-                    ($this->currentPlayer === 1) ? 2 : 1;
+                $this->currentPlayer = ($this->currentPlayer === 1) ? 2 : 1;
             }
         }
 
