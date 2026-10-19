@@ -53,4 +53,6 @@
 52. Bingo 
 53. Number Sliding game
 54. Tango game
+55. LCM
+56. GCD
 
