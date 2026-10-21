@@ -56,5 +56,6 @@
 55. LCM
 56. GCD
 57. MineSweeper
+58. Perfect Numbers
 
 
