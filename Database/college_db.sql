@@ -1,0 +1,16 @@
+/*CREATE DATABASE college_db;*/
+
+USE college_db;
+
+/*CREATE TABLE college(cid INT PRIMARY KEY AUTO_INCREMENT,
+cname VARCHAR(100)NOT NULL,
+place VARCHAR(50)NOT NULL,
+post INT NOT NULL;*/
+
+#ALTER TABLE college ADD pin INT NOT NULL;
+
+#ALTER TABLE college MODIFY post VARCHAR(50);
+
+DESCRIBE college;
+
+
