@@ -11,6 +11,8 @@ post INT NOT NULL;*/
 
 #ALTER TABLE college MODIFY post VARCHAR(50);
 
-DESCRIBE college;
+#DESCRIBE college;
+
+select * from college_db.college;
 
 
