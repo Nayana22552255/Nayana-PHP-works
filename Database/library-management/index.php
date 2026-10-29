@@ -1,11 +1,12 @@
 <?php
-require_once "database.php";
-require_once "book.php";
-require_once "author.php";
-require_once "genre.php";
-require_once "member.php";
-require_once "borrowing.php";
-require_once "fees.php";
+require_once "Database.php";
+require_once "Book.php";
+require_once "Author.php";
+require_once "Genre.php";
+require_once "Member.php";
+require_once "Borrowing.php";
+require_once "Fee.php";
+require_once "Bookinventory.php";
 
 try
 {
@@ -17,6 +18,7 @@ try
     $member=new Member($conn);
     $borrowing=new Borrowing($conn);
     $fee=new Fee($conn);
+    $bookinventory=new BookInventory($conn);
 
     echo "==============================\n";
     echo "     LIBRARY MANGEMENT SYSTEM \n";
@@ -92,8 +94,14 @@ try
                 3=> ['label' => 'View All Fines and Revenue', 'action' => 32],
 
             ]
-        ]
-    ];
+        ],
+        7 => [
+            'title'=>'Book History',
+            'options'=>[
+                1=>['label'=>'Menu','action'=>33]
+            ]
+        ]];
+        
 
     while (true) {
         echo "\n========== MAIN MENU ==========\n";
@@ -141,18 +149,20 @@ try
         {
             case 1:
                         $book->showAll();
+                        echo "------------------\n";
                         break;
             case 2:
                         $title=trim(readline("Enter book title: "));
 
-                        $yearInput=trim(readline("Enter the publication year: "));
+                        while (true) {
+                            $yearInput=trim(readline("Enter publication year: "));
+                            break;
+                        }
 
                         $year= $yearInput === "" ? null : (int)$yearInput;
 
                         $isbn=trim(readline("Enter ISBN (leave blank if unavailable): "));
                         $isbn=$isbn === "" ? null : $isbn;
-
-                        $format= trim(readline("Enter physical format: "));
 
                         $description=trim(readline("Enter description: "));
 
@@ -170,24 +180,28 @@ try
                             $title,
                             $year,
                             $isbn,
-                            $format,
                             $description,
                             $price,
                             $copies
                         );
-
+                        echo "--------------------------\n";
                         break;
+
             case 3:
                         $keyword=trim(readline("Enter book title or keyword: "));
                         $book->search($keyword);
+                        echo "-----------------------------\n";
                         break;
+                        
             case 4:
                         $book_id=(int)readline("enter book id: ");
                         $book->updateBook($book_id);
+                        echo "------------------------------\n";
                         break;
             case 5:
                         $book_id=(int)readline("enter the book Id to delete: ");
                         $book->delete($book_id);
+                        echo "------------------------------------\n";
                         break;
                     
             case 6:
@@ -196,14 +210,17 @@ try
                         $biography=readline("enter the Biography: ");
                         $biography=$biography === "" ? null : $biography;
                         $author->addAuthor($name,$biography);
+                        echo "-------------------------------------------\n";
                         break;
             case 7:
                         $author->showAll();
                         //$author->showAuthorsWithBooks();
+                        echo "----------------------------------------------\n";
                         break;
 
             case 8:     $keyword=trim(readline("Enter the author name or keyword: "));
                         $author->search($keyword);
+                        echo "--------------------------------------------------\n";
                         break;
 
             case 9:     $authorId=(int)readline("enter the id: ");
@@ -211,34 +228,41 @@ try
                         $biography=trim(readline("enter the biography: "));
                         $biography=$biography === "" ? null : $biography;
                         $author->update($authorId,$name,$biography);
+                        echo "---------------------------------------------------\n";
                         break;
             case 10:
                         $authorId=(int)readline("enter the author id: ");
                         $author->delete($authorId);
+                        echo "---------------------------------------------------\n";
                         break;
             case 11:
                         $name=trim(readline("enter the genre name: "));
                         $parentIdInput=trim(readline("enter the parent id, or leave blank for none: "));
                         $parentId=$parentIdInput === "" ? null : (int)$parentIdInput;
                         $genre->add($name,$parentId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 12:    $genre->showAll();
+                        echo "---------------------------------------------------\n";
                         break;
 
-            case 13:     $keyword=readline("enter the keyword for searching the genre: ");
-                         $genre->search($keyword);
-                         break;
+            case 13:    $keyword=readline("enter the keyword for searching the genre: ");
+                        $genre->search($keyword);
+                        echo "---------------------------------------------------\n";
+                        break;
 
             case 14:    $genreId=(int)readline("enter the genre id: ");
                         $name=trim(readline("enter the genre name: "));
                         $parentIdInput=trim(readline("enter the parent id, or leave blank for none: "));
                         $parentId=$parentIdInput === "" ? null : (int)$parentIdInput;
                         $genre->update($genreId,$name,$parentId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 15:    $genreId=(int)readline("enter the genreId: ");
                         $genre->delete($genreId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 16:
@@ -249,14 +273,17 @@ try
                         $maxBooks=(int)readline("Enter the maximum books: ");
                         $loanDays=(int)readline("Enter the loan days: ");
                         $member->addMember($name,$email,$phone,$lateFeeRateForCategory,$maxBooks,$loanDays);
+                        echo "---------------------------------------------------\n";
                         break;
                         
             case 17:    $member->showAll();
+                        echo "---------------------------------------------------\n";
                         break;
                     
             case 18:
                         $keyword=readline("Enter the keyword for searching\n");
                         $member->searchMember($keyword);
+                        echo "---------------------------------------------------\n";
                         break;
             
 
@@ -268,6 +295,7 @@ try
                         $maxBooks=(int)readline("Enter the Maximum books: ");
                         $loanDays=(int)readline("Enter the loan Days");
                         $member->updateMembers($memberId,$name,$email,$phone,$lateFeeRateForCategory,$maxBooks,$loanDays,);
+                        echo "---------------------------------------------------\n";
                         break;
                        
             case 20:
@@ -280,33 +308,41 @@ try
                         }
                         $active=$status === 'active';
                         $member->setStatus($memberId,$active);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 21:
                         $memberId=(int)readline("Enter the member id for deleting: ");
                         $member->deleteMember($memberId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 22:    $borrowing->showAll();
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 23:    $memberId=(int)readline("enter the memeber id: ");
                         $bookId=(int)readline("enter the book id: ");
                         $borrowing->borrow($memberId,$bookId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 24:    $borrowingId=(int)readline("Enter the borrowing id: ");
                         $borrowing->returnBook($borrowingId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 25:
                         $fee->showAll();
+                        echo "---------------------------------------------------\n";
                         break;
                 
             case 26:
                         $keyword=readline("enter a keyword for searching a fee: ");
                         $fee->search($keyword);
+                        echo "---------------------------------------------------\n";
                         break;
+            
             /*case 27:
                         $borrowingId=(int)readline("enter the Id: ");
                         $fee->addLateFee($borrowingId);
@@ -315,11 +351,13 @@ try
             case 28:
                         $borrowingId=(int)readline("Enter the borrowing id: ");
                         $fee->addLostFee($borrowingId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 29:
                         $feeId=(int)readline("Enter the fee id: ");
                         $fee->markPaid($feeId);
+                        echo "---------------------------------------------------\n";
                         break;
             
             /*case 30:
@@ -330,16 +368,23 @@ try
             case 30:
                         $memberId = (int) readline("Enter the member ID: ");
                         $borrowing->viewAllMemberFines($memberId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 31:
                         $memberId=(int)readline("Enter Member ID: ");
                         $borrowing->showMemberBorrowingHistory($memberId);
+                        echo "---------------------------------------------------\n";
                         break;
 
             case 32:
                         $fee->viewAllFines();
+                        echo "---------------------------------------------------\n";
                         break; 
+
+            case 33:
+                        $bookinventory->menu();
+                        break;
                 
             default:
                         echo "Invalid choice. Please select 1-21.\n";
