@@ -15,108 +15,313 @@ class Book
 
     // Display available genres
    public function showGenres(): void
-{
-    $sql = "SELECT
-                g.genre_id,
-                g.genre_name,
-                p.genre_name AS parent_genre
-                FROM genres g
-                LEFT JOIN genres p
-                ON g.parent_genre_id = p.genre_id
-                ORDER BY g.genre_id";
+    {
+        $sql = "SELECT
+                    g.genre_id,
+                    g.genre_name,
+                    p.genre_name AS parent_genre
+                    FROM genres g
+                    LEFT JOIN genres p
+                    ON g.parent_genre_id = p.genre_id
+                    ORDER BY g.genre_id";
 
-    $stmt = $this->conn->query($sql);
-    $genres = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $this->conn->query($sql);
+        $genres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo "\n----------------Genre list----------------\n";
+        echo "\n----------------Genre list----------------\n";
 
-    if (empty($genres)) {
-        echo "No genres found.\n";
-        return;
+        if (empty($genres)) {
+            echo "No genres found.\n";
+            return;
+        }
+
+        foreach ($genres as $genre) {
+            echo "Genre Id: " . $genre['genre_id'] . "\n";
+            echo "Genre Name: " . $genre['genre_name'] . "\n";
+            echo "Parent Genre: "
+                . ($genre['parent_genre'] ?? 'None') . "\n";
+        }
     }
 
-    foreach ($genres as $genre) {
-        echo "Genre Id: " . $genre['genre_id'] . "\n";
-        echo "Genre Name: " . $genre['genre_name'] . "\n";
-        echo "Parent Genre: "
-            . ($genre['parent_genre'] ?? 'None') . "\n";
+    
+    private function selectOrCreateGenre(): int
+        {
+            while (true) {
+                echo "\n========== GENRE OPTIONS ==========\n";
+                echo "1. Select Existing Genre\n";
+                echo "2. Add New Genre\n";
+                echo "0. Cancel\n";
+
+                $choice = trim(readline("Choose an option: "));
+
+                if ($choice === "0") {
+                    throw new RuntimeException("Book addition cancelled.");
+                }
+
+                if ($choice === "1") {
+                    $this->showGenres();
+
+                    $input = trim(readline("Enter Genre ID: "));
+
+                    if ($input === "" || !ctype_digit($input)) {
+                        echo "Please enter a valid numeric Genre ID.\n";
+                        continue;
+                    }
+
+                    $genreId = (int) $input;
+
+                    $stmt = $this->conn->prepare(
+                        "SELECT genre_id FROM genres WHERE genre_id = ?"
+                    );
+                    $stmt->execute([$genreId]);
+
+                    if ($stmt->fetchColumn() !== false) {
+                        return $genreId;
+                    }
+
+                    echo "Genre ID not found. Try again.\n";
+                } elseif ($choice === "2") {
+                    $name = trim(readline("Enter new genre name: "));
+
+                    if ($name === "") {
+                        echo "Genre name cannot be empty.\n";
+                        continue;
+                    }
+
+                    // Check whether this genre already exists.
+                    $stmt = $this->conn->prepare(
+                        "SELECT genre_id
+                        FROM genres
+                        WHERE LOWER(TRIM(genre_name)) = LOWER(TRIM(?))"
+                    );
+                    $stmt->execute([$name]);
+
+                    $existingId = $stmt->fetchColumn();
+
+                    if ($existingId !== false) {
+                        echo "This genre already exists. Genre ID: "
+                            . $existingId . "\n";
+
+                        return (int) $existingId;
+                    }
+
+                    // Choose a parent genre, if needed.
+                    $this->showGenres();
+
+                    $parentInput = trim(
+                        readline("Enter parent Genre ID, or 0 for a main genre: ")
+                    );
+
+                    if ($parentInput === "" || !ctype_digit($parentInput)) {
+                        echo "Invalid parent Genre ID.\n";
+                        continue;
+                    }
+
+                    $parentId = (int) $parentInput;
+
+                    if ($parentId !== 0) {
+                        $stmt = $this->conn->prepare(
+                            "SELECT genre_id
+                            FROM genres
+                            WHERE genre_id = ?"
+                        );
+                        $stmt->execute([$parentId]);
+
+                        if ($stmt->fetchColumn() === false) {
+                            echo "Parent Genre ID not found.\n";
+                            continue;
+                        }
+                    }
+
+                    $stmt = $this->conn->prepare(
+                        "INSERT INTO genres (genre_name, parent_genre_id)
+                        VALUES (?, ?)"
+                    );
+
+                    $stmt->execute([
+                        $name,
+                        $parentId === 0 ? null : $parentId
+                    ]);
+
+                    $newGenreId = (int) $this->conn->lastInsertId();
+
+                    echo "New genre added successfully!\n";
+                    echo "Genre ID: " . $newGenreId . "\n";
+
+                    return $newGenreId;
+                } else {
+                    echo "Invalid option. Please try again.\n";
+                }
+            }
     }
-}
+
+
+        
+        private function physicalFormats(): array
+        {
+            return [
+                1 => 'Book',
+                2 => 'Manga',
+                3 => 'Magazine',
+                4 => 'Comic',
+                5 => 'Graphic Novel',
+                6 => 'Textbook',
+                7 => 'Reference Book',
+                8 => 'Journal'
+            ];
+        }
+
+        private function physicalFormatName(string $storedFormat): string
+        {
+            $formats = $this->physicalFormats();
+
+            if (ctype_digit($storedFormat)) {
+                return $formats[(int) $storedFormat] ?? $storedFormat;
+            }
+
+            return $storedFormat;
+        }
+
+        private function selectPhysicalFormat(bool $allowKeep = false): ?string
+        {
+            $formats = $this->physicalFormats();
+
+            echo "\n========== PHYSICAL FORMAT ==========\n";
+
+            if ($allowKeep) {
+                echo "0. Keep current format\n";
+            }
+
+            foreach ($formats as $id => $name) {
+                echo "$id. $name\n";
+            }
+
+            while (true) {
+                $input = trim(readline(
+                    $allowKeep
+                        ? "Select physical format ID (blank or 0 to keep): "
+                        : "Select physical format ID: "
+                ));
+
+                if ($allowKeep && ($input === '' || $input === '0')) {
+                    return null;
+                }
+
+                if ($input !== '' && ctype_digit($input)) {
+                    $formatId = (int) $input;
+
+                    if (isset($formats[$formatId])) {
+                        echo "Selected format: "
+                            . $formats[$formatId] . "\n";
+
+                        return $formats[$formatId];
+                    }
+                }
+
+                echo "Invalid choice. Please select a valid format ID.\n";
+            }
+        }
+
+
+
 
     // Add a new book using a genre ID selected from the available genres.
     public function addBook(
         string $title,
         ?int $year,
         ?string $isbn,
-        string $format,
         ?string $description,
         float $price,
         int $copies
-    ): void {
-        $this->showGenres();
+    ): void 
+    {
 
-        $genreIdInput = trim(readline("Enter genre ID: "));
-        if ($genreIdInput === "" || !ctype_digit($genreIdInput)) {
-            echo "Invalid genre ID. Please enter a numeric ID from the list.\n";
-            return;
-        }
-        $genreId = (int) $genreIdInput;
 
-        $check = $this->conn->prepare(
-            "SELECT genre_name FROM genres WHERE genre_id = ?"
-        );
-        $check->execute([$genreId]);
-        $genreName = $check->fetchColumn();
+        
+    $genreId = $this->selectOrCreateGenre();
+    $selectedFormat = $this->selectPhysicalFormat();
+    if ($selectedFormat === null) {
+        return;
+    }
+    $format = $selectedFormat;
 
-        if ($genreName === false) {
-            echo "Invalid genre ID. Please select an available genre.\n";
-            $this->showGenres();
-            return;
-        }
+    // Get the selected or newly created genre name.
+    $check = $this->conn->prepare(
+        "SELECT genre_name FROM genres WHERE genre_id = ?"
+    );
+    $check->execute([$genreId]);
+    $genreName = $check->fetchColumn();
+
+    if ($genreName === false) {
+        echo "Genre not found. Book was not added.\n";
+        return;
+    }
+
+        
 
         $author = new Author($this->conn);
         $author->showAll();
+        $authorChoices = [];
+        $selectedAuthorIds = [];
 
-        $authorInput = trim(readline("Enter an existing author ID or a new author name (blank to keep): "));
-        $newAuthorName = null;
-        $newAuthorBiography = null;
-        $authorId = null;
-        $authorName = null;
-        if ($authorInput !== '' && ctype_digit($authorInput)) {
+        while (true) {
+            $authorInput = trim(readline(
+                "Enter an author ID, N to add a new author, or press Enter when finished: "
+            ));
+
+            if ($authorInput === '') {
+                break;
+            }
+
+            if (strcasecmp($authorInput, 'N') === 0) {
+                $newAuthorName = trim(readline("New author name: "));
+                if ($newAuthorName === '' || strlen($newAuthorName) > 20) {
+                    echo "Author name must contain 1 to 20 characters.\n";
+                    continue;
+                }
+
+                $biographyInput = trim(readline("New author biography (optional): "));
+                $authorChoices[] = [
+                    'author_id' => null,
+                    'author_name' => $newAuthorName,
+                    'biography' => $biographyInput === '' ? null : $biographyInput
+                ];
+                echo "New author added to this book selection.\n";
+                continue;
+            }
+
+            if (!ctype_digit($authorInput)) {
+                echo "Enter a listed author ID, N for a new author, or Enter to finish.\n";
+                continue;
+            }
+
             $authorId = (int) $authorInput;
+            if (isset($selectedAuthorIds[$authorId])) {
+                echo "That author is already selected.\n";
+                continue;
+            }
+
             $checkAuthor = $this->conn->prepare(
                 "SELECT author_name FROM authors WHERE author_id = ?"
             );
             $checkAuthor->execute([$authorId]);
             $authorName = $checkAuthor->fetchColumn();
-
             if ($authorName === false) {
-                echo "Invalid author ID. Please select an author from the list.\n";
-                $author->showAll();
-                return;
+                echo "Author ID $authorId was not found. Choose an ID from the list.\n";
+                continue;
             }
-        } elseif ($authorInput !== '') {
-            if (strlen($authorInput) > 20) {
-                echo "Author name must be 20 characters or fewer.\n";
-                return;
-            }
-            $newAuthorName = $authorInput;
-            $authorName = $newAuthorName;
-            $biographyInput = trim(readline("New author biography (optional): "));
-            $newAuthorBiography = $biographyInput === '' ? null : $biographyInput;
+
+            $authorChoices[] = [
+                'author_id' => $authorId,
+                'author_name' => $authorName,
+                'biography' => null
+            ];
+            $selectedAuthorIds[$authorId] = true;
         }
 
         $this->conn->beginTransaction();
 
         try {
-            if ($newAuthorName !== null) {
-                $addAuthor = $this->conn->prepare(
-                    "INSERT INTO authors (author_name, biography) VALUES (?, ?)"
-                );
-                $addAuthor->execute([$newAuthorName, $newAuthorBiography]);
-                $authorId = (int) $this->conn->lastInsertId();
-            }
-
             $stmt = $this->conn->prepare(
                 "INSERT INTO books
                     (title, publication_year, isbn,
@@ -134,29 +339,41 @@ class Book
             ]);
 
             $bookId = (int) $this->conn->lastInsertId();
-            if ($authorId !== null) {
-                $link = $this->conn->prepare(
-                    "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)"
-                );
+            $link = $this->conn->prepare(
+                "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)"
+            );
+            $addAuthor = $this->conn->prepare(
+                "INSERT INTO authors (author_name, biography) VALUES (?, ?)"
+            );
+            foreach ($authorChoices as $authorChoice) {
+                $authorId = $authorChoice['author_id'];
+                if ($authorId === null) {
+                    $addAuthor->execute([
+                        $authorChoice['author_name'],
+                        $authorChoice['biography']
+                    ]);
+                    $authorId = (int) $this->conn->lastInsertId();
+                }
+
                 $link->execute([$bookId, $authorId]);
             }
 
-        if ($copies < 1) {
-        throw new InvalidArgumentException(
-            "Number of copies must be at least 1."
-        );
-        }
+            if ($copies < 1) {
+                throw new InvalidArgumentException(
+                    "Number of copies must be at least 1."
+                );
+            }
 
-        $copyStmt = $this->conn->prepare(
-            "INSERT INTO book_copies (book_id, status)
-            VALUES (?, 'Available')"
-        );
+            $copyStmt = $this->conn->prepare(
+                "INSERT INTO book_copies (book_id, status,inventory_date)
+                VALUES (?, 'Available',CURDATE())"
+            );
 
-        for ($i = 0; $i < $copies; $i++) {
-            $copyStmt->execute([$bookId]);
-        }
+            for ($i = 0; $i < $copies; $i++) {
+                $copyStmt->execute([$bookId]);
+            }
 
-         $this->conn->commit();
+            $this->conn->commit();
         } catch (Throwable $e) {
             if ($this->conn->inTransaction()) {
                 $this->conn->rollBack();
@@ -168,10 +385,8 @@ class Book
         echo "Book added successfully!\n";
         echo "Genre: $genreName\n";
         echo "Genre ID: $genreId\n";
-        echo "Author: " . ($authorName ?? 'Not assigned') . "\n";
-        if ($authorId !== null) {
-            echo "Author ID: $authorId\n";
-        }
+        $authorNames = array_column($authorChoices, 'author_name');
+        echo "Author(s): " . (empty($authorNames) ? 'Not assigned' : implode(', ', $authorNames)) . "\n";
         echo "Book ID: $bookId\n\n";
         echo "Total copies added: " . $copies . "\n";
         echo "Available copies: " . $copies . "\n";
@@ -198,14 +413,14 @@ class Book
             echo "No books found.\n";
             return;
         }
-
         foreach ($books as $book) {
             echo "-------------------------\n";
             echo "Book ID: " . $book['book_id'] . "\n";
             echo "Title: " . $book['title'] . "\n";
             echo "Publication Year: " . $book['publication_year'] . "\n";
             echo "ISBN: " . $book['isbn'] . "\n";
-            echo "Format: " . $book['physical_format'] . "\n";
+            echo "Format: "
+                . $this->physicalFormatName((string) $book['physical_format']) . "\n";
             echo "Description: " . $book['description'] . "\n";
             echo "Price: " . $book['price'] . "\n";
             echo "Genre ID: " . $book['genre_id'] . "\n";
@@ -220,7 +435,7 @@ class Book
     public function search(string $keyword): void
     {
         $sql = "SELECT b.book_id, b.title,
-                       b.publication_year, b.price,
+                       b.publication_year, b.physical_format, b.price,
                        b.genre_id, g.genre_name
                 FROM books b
                 LEFT JOIN genres g ON b.genre_id = g.genre_id
@@ -244,6 +459,8 @@ class Book
             echo "Book ID: " . $book['book_id'] . "\n";
             echo "Title: " . $book['title'] . "\n";
             echo "Year: " . $book['publication_year'] . "\n";
+            echo "Format: "
+                . $this->physicalFormatName((string) $book['physical_format']) . "\n";
             echo "Price: " . $book['price'] . "\n";
             echo "Genre ID: " . $book['genre_id'] . "\n";
             echo "Genre Name: ". ($book['genre_name'] ?? 'Not assigned') . "\n";
@@ -277,20 +494,30 @@ class Book
         $title = $title === '' ? $book['title'] : $title;
 
         echo "Current publication year: " . ($book['publication_year'] ?? '') . "\n";
-        $yearInput = trim(readline("New publication year: "));
-        if ($yearInput !== '' && !ctype_digit($yearInput)) {
-            echo "Invalid publication year. Book was not updated.\n";
-            return;
+        while (true) {
+            $yearInput = trim(readline(
+                "New publication year:  "
+            ));
+            break;
+
         }
+
+
+            //echo "Invalid year. Enter a whole number from 1990 to 2155, or press Enter to keep the current year.\n" }\
         $year = $yearInput === '' ? $book['publication_year'] : (int) $yearInput;
 
         echo "Current ISBN: " . ($book['isbn'] ?? '') . "\n";
         $isbnInput = trim(readline("New ISBN: "));
         $isbn = $isbnInput === '' ? $book['isbn'] : ($isbnInput === '-' ? null : $isbnInput);
 
-        echo "Current physical format: " . $book['physical_format'] . "\n";
-        $format = trim(readline("New physical format: "));
-        $format = $format === '' ? $book['physical_format'] : $format;
+        
+        echo "Current physical format: "
+            . $this->physicalFormatName((string) $book['physical_format']) . "\n";
+        $formatInput = $this->selectPhysicalFormat(true);
+        $format = $formatInput === null
+            ? $this->physicalFormatName((string) $book['physical_format'])
+            : $formatInput;
+
 
         echo "Current description: " . ($book['description'] ?? '') . "\n";
         $descriptionInput = trim(readline("New description: "));
@@ -328,28 +555,60 @@ class Book
         }
 
         echo "Current author(s): " . ($book['author_names'] ?? 'Not assigned') . "\n";
+        echo "Press Enter or enter K to keep current authors; enter X to remove all authors, or add IDs/new authors to replace the author list.\n";
         (new Author($this->conn))->showAll();
-        $authorInput = trim(readline("Enter an existing author ID or a new author name (blank to keep): "));
-        $authorId = null;
-        $newAuthorName = null;
-        $newAuthorBiography = null;
-        if ($authorInput !== '' && !ctype_digit($authorInput)) {
-            if (strlen($authorInput) > 20) {
-                echo "Author name must be 20 characters or fewer. Book was not updated.\n";
-                return;
-            }
-            $newAuthorName = $authorInput;
-            $biographyInput = trim(readline("New author biography (optional): "));
-            $newAuthorBiography = $biographyInput === '' ? null : $biographyInput;
-        } elseif ($authorInput !== '') {
-            $authorId = (int) $authorInput;
-            $check = $this->conn->prepare(
-                "SELECT COUNT(*) FROM authors WHERE author_id = ?"
-            );
-            $check->execute([$authorId]);
-            if ((int) $check->fetchColumn() === 0) {
-                echo "Author ID not found. Book was not updated.\n";
-                return;
+        $authorChoices = [];
+        $selectedAuthorIds = [];
+        $replaceAuthors = false;
+        $authorInput = trim(readline(
+            "Author ID, N for a new author, K/Enter to keep, or X to remove all: "
+        ));
+
+        if ($authorInput !== '' && strcasecmp($authorInput, 'K') !== 0) {
+            $replaceAuthors = true;
+
+            while ($authorInput !== '' && strcasecmp($authorInput, 'X') !== 0) {
+                if (strcasecmp($authorInput, 'N') === 0) {
+                    $newAuthorName = trim(readline("New author name: "));
+                    if ($newAuthorName === '' || strlen($newAuthorName) > 20) {
+                        echo "Author name must contain 1 to 20 characters.\n";
+                    } else {
+                        $biographyInput = trim(readline("New author biography (optional): "));
+                        $authorChoices[] = [
+                            'author_id' => null,
+                            'author_name' => $newAuthorName,
+                            'biography' => $biographyInput === '' ? null : $biographyInput
+                        ];
+                        echo "New author added to the selection.\n";
+                    }
+                } elseif (ctype_digit($authorInput)) {
+                    $authorId = (int) $authorInput;
+                    if (isset($selectedAuthorIds[$authorId])) {
+                        echo "That author is already selected.\n";
+                    } else {
+                        $check = $this->conn->prepare(
+                            "SELECT author_name FROM authors WHERE author_id = ?"
+                        );
+                        $check->execute([$authorId]);
+                        $authorName = $check->fetchColumn();
+                        if ($authorName === false) {
+                            echo "Author ID $authorId was not found. Choose an ID from the list.\n";
+                        } else {
+                            $authorChoices[] = [
+                                'author_id' => $authorId,
+                                'author_name' => $authorName,
+                                'biography' => null
+                            ];
+                            $selectedAuthorIds[$authorId] = true;
+                        }
+                    }
+                } else {
+                    echo "Enter a listed author ID, N for a new author, X to remove all, or Enter to finish.\n";
+                }
+
+                $authorInput = trim(readline(
+                    "Add another author ID or N for a new author (Enter to finish): "
+                ));
             }
         }
 
@@ -377,24 +636,31 @@ class Book
                 ':book_id' => $book_id
             ]);
 
-            if ($newAuthorName !== null) {
-                $addNewAuthor = $this->conn->prepare(
-                    "INSERT INTO authors (author_name, biography) VALUES (?, ?)"
-                );
-                $addNewAuthor->execute([$newAuthorName, $newAuthorBiography]);
-                $authorId = (int) $this->conn->lastInsertId();
-            }
-
-            if ($authorId !== null) {
+            if ($replaceAuthors) {
                 $deleteAuthors = $this->conn->prepare(
                     "DELETE FROM book_authors WHERE book_id = ?"
                 );
                 $deleteAuthors->execute([$book_id]);
 
-                $addAuthor = $this->conn->prepare(
+                $addNewAuthor = $this->conn->prepare(
+                    "INSERT INTO authors (author_name, biography) VALUES (?, ?)"
+                );
+                $addAuthorLink = $this->conn->prepare(
                     "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)"
                 );
-                $addAuthor->execute([$book_id, $authorId]);
+
+                foreach ($authorChoices as $authorChoice) {
+                    $authorId = $authorChoice['author_id'];
+                    if ($authorId === null) {
+                        $addNewAuthor->execute([
+                            $authorChoice['author_name'],
+                            $authorChoice['biography']
+                        ]);
+                        $authorId = (int) $this->conn->lastInsertId();
+                    }
+
+                    $addAuthorLink->execute([$book_id, $authorId]);
+                }
             }
 
             $this->conn->commit();
@@ -426,6 +692,11 @@ class Book
         try {
             $stmt = $this->conn->prepare(
                 "DELETE FROM book_authors WHERE book_id = ?"
+            );
+            $stmt->execute([$book_id]);
+
+            $stmt = $this->conn->prepare(
+                "DELETE FROM book_copies WHERE book_id = ?"
             );
             $stmt->execute([$book_id]);
 
