@@ -164,7 +164,7 @@
     {
         try 
         {
-            $checkBooks=$this->conn->prepare("SELECT COUNT(*)FROM book_genres
+            $checkBooks=$this->conn->prepare("SELECT COUNT(*) FROM books
                         WHERE genre_id=:id");
 
             $checkBooks->execute([':id'=>$genreId]);
