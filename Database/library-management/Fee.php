@@ -35,7 +35,7 @@ class Fee
     }
 }
 
-    public function processOverdueBorrowings(): void
+   /* public function processOverdueBorrowings(): void
     {
         $messages = [];
 
@@ -70,8 +70,186 @@ class Fee
 
             throw $e;
         }
+    }*/
+
+            
+    public function processOverdueBorrowings(): void
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            // Find all overdue books that have not been returned
+            $sql = "SELECT
+                    br.borrowing_id,
+                    br.due_date,
+                    m.category
+                    FROM borrowings br
+                    INNER JOIN members m
+                    ON br.member_id = m.member_id
+                    WHERE br.return_date IS NULL
+                    AND br.due_date < CURDATE()
+                    FOR UPDATE
+            ";
+
+            $stmt = $this->conn->query($sql);
+            $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($records as $record) {
+
+                $borrowingId = (int) $record['borrowing_id'];
+
+                // Get the member's daily late-fee rate
+                $dailyRate = self::lateFeeRateForCategory(
+                    $record['category']
+                );
+
+                // Find existing unpaid late-fee records
+                $pendingQuery = $this->conn->prepare(
+                    "SELECT fee_id, fee_date
+                    FROM fees
+                    WHERE borrowing_id = ?
+                    AND fee_type = 'Late fee'
+                    AND payment_status = 'pending'
+                    ORDER BY fee_date, fee_id
+                    FOR UPDATE"
+                );
+
+                $pendingQuery->execute([$borrowingId]);
+                $pendingFees = $pendingQuery->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($pendingFees)) {
+
+                    // Keep the earliest pending record
+                    $feeId = (int) $pendingFees[0]['fee_id'];
+                    $startDate = $pendingFees[0]['fee_date'];
+
+                    // Remove additional pending daily records
+                    if (count($pendingFees) > 1) {
+
+                        $extraIds = array_map(
+                            'intval',
+                            array_column(
+                                array_slice($pendingFees, 1),
+                                'fee_id'
+                            )
+                        );
+
+                        $placeholders = implode(
+                            ',',
+                            array_fill(0, count($extraIds), '?')
+                        );
+
+                        $delete = $this->conn->prepare(
+                            "DELETE FROM fees
+                            WHERE fee_id IN ($placeholders)"
+                        );
+
+                        $delete->execute($extraIds);
+                    }
+
+                } else {
+
+                    // Find the last payment date, if any
+                    $paidQuery = $this->conn->prepare(
+                        "SELECT MAX(COALESCE(payment_date, fee_date))
+                        FROM fees
+                        WHERE borrowing_id = ?
+                        AND fee_type = 'Late fee'
+                        AND payment_status = 'paid'"
+                    );
+
+                    $paidQuery->execute([$borrowingId]);
+                    $lastPaidDate = $paidQuery->fetchColumn();
+
+                    // First overdue day is the day after the due date
+                    $startDate = date(
+                        'Y-m-d',
+                        strtotime($record['due_date'] . ' +1 day')
+                    );
+
+                    // If a previous fee was paid, start the next period
+                    // on the day after that payment.
+                    if ($lastPaidDate !== null) {
+                        $nextStartDate = date(
+                            'Y-m-d',
+                            strtotime($lastPaidDate . ' +1 day')
+                        );
+
+                        if ($nextStartDate > $startDate) {
+                            $startDate = $nextStartDate;
+                        }
+                    }
+
+                    // No overdue days remain unpaid yet
+                    if ($startDate > date('Y-m-d')) {
+                        continue;
+                    }
+
+                    // Create one pending fee record
+                    $insert = $this->conn->prepare(
+                        "INSERT INTO fees
+                            (borrowing_id, fee_type, amount,
+                            fee_date, payment_status)
+                        VALUES (?, 'Late fee', 0, ?, 'pending')"
+                    );
+
+                    $insert->execute([
+                        $borrowingId,
+                        $startDate
+                    ]);
+
+                    $feeId = (int) $this->conn->lastInsertId();
+                }
+
+                // Calculate cumulative fee from the starting date
+                $start= new DateTimeImmutable($startDate);
+                $today=new DateTimeImmutable(date('Y-m-d'));
+                $days=(int) $start->diff($today)->days + 1;
+
+                $totalAmount = $days * $dailyRate;
+
+                // Update the same pending row
+                $updateFee = $this->conn->prepare(
+                    "UPDATE fees
+                    SET amount = ?
+                    WHERE fee_id = ?
+                    AND payment_status = 'pending'"
+                );
+
+                $updateFee->execute([
+                    $totalAmount,
+                    $feeId
+                ]);
+            }
+
+            // Update the cumulative late fee in borrowings
+            $updateBorrowing = $this->conn->prepare(
+                "UPDATE borrowings br
+                SET br.late_fee = (
+                    SELECT COALESCE(SUM(f.amount), 0)
+                    FROM fees f
+                    WHERE f.borrowing_id = br.borrowing_id
+                    AND f.fee_type = 'Late fee'
+                )
+                WHERE br.return_date IS NULL"
+            );
+
+            $updateBorrowing->execute();
+
+            $this->conn->commit();
+
+        } catch (Throwable $e) {
+
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
+            
+        
 
    
     public function showAll(): void
@@ -411,8 +589,8 @@ class Fee
     {
     do {
         echo "\n========== FINES AND REVENUE MENU ==========\n";
-        echo "1. Fee History\n";
-        echo "2. Total Fees\n";
+        echo "1. Fine History\n";
+        echo "2. Total Fines\n";
         echo "3. Revenue per Book\n";
         echo "0. Back to Main Menu\n";
         echo "============================================\n";
@@ -451,10 +629,12 @@ class Fee
                     f.borrowing_id,
                     b.title AS book_title,
                     m.name AS member_name,
+                    br.borrow_date,
                     f.fee_type,
                     f.amount,
                     f.fee_date,
-                    f.payment_status
+                    f.payment_status,
+                    f.payment_date
                 FROM fees f
                 JOIN borrowings br
                     ON f.borrowing_id = br.borrowing_id
@@ -475,14 +655,24 @@ class Fee
         }
 
         foreach ($fees as $fee) {
+            $paymentStatus = strtolower((string) $fee['payment_status']);
+            if ($paymentStatus === 'pending') {
+                $paymentStatus = 'Unpaid';
+            } else {
+                $paymentStatus = ucfirst($paymentStatus);
+            }
+
             echo "\nFee ID: " . $fee['fee_id'] . "\n";
+            echo "Borrowing ID: " . $fee['borrowing_id'] . "\n";
             echo "Book: " . $fee['book_title'] . "\n";
             echo "Member: " . $fee['member_name'] . "\n";
+            echo "Borrowed On: " . $fee['borrow_date'] . "\n";
             echo "Fee Type: " . $fee['fee_type'] . "\n";
             echo "Amount: Rs. "
                 . number_format((float) $fee['amount'], 2) . "\n";
             echo "Fee Date: " . $fee['fee_date'] . "\n";
-            echo "Payment Status: " . $fee['payment_status'] . "\n";
+            echo "Payment Status: " . $paymentStatus . "\n";
+            echo "Payment Date: " . ($fee['payment_date'] ?? 'Not paid') . "\n";
             echo "---------------------------------\n";
         }
     } catch (Throwable $e) {
