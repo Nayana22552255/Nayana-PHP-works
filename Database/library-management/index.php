@@ -18,7 +18,9 @@ try
     $member=new Member($conn);
     $borrowing=new Borrowing($conn);
     $fee=new Fee($conn);
+    $fee->processOverdueBorrowings();
     $bookinventory=new BookInventory($conn);
+    $borrowing->updateOverdueLateFees();
 
     echo "==============================\n";
     echo "     LIBRARY MANGEMENT SYSTEM \n";
@@ -104,6 +106,8 @@ try
         
 
     while (true) {
+        
+        $borrowing->updateOverdueLateFees();
         echo "\n========== MAIN MENU ==========\n";
         foreach ($sections as $sectionId => $section) {
             echo $sectionId . ". " . $section['title'] . "\n";
@@ -138,7 +142,6 @@ try
         $choice = $selectedSection['options'][$optionChoice]['action'];
 
     try {
-        $fee->processOverdueBorrowings();
     } catch (Throwable $e) {
         echo "Error processing automatic overdue fees: " . $e->getMessage() . "\n";
     }
