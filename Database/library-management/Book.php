@@ -17,7 +17,7 @@ class Book
    public function showGenres(): void
     {
         $sql = "SELECT
-                    g.genre_id,
+                    g.genre_id,                   
                     g.genre_name,
                     p.genre_name AS parent_genre
                     FROM genres g
