@@ -11,9 +11,36 @@ class Borrowing
         $this->conn = $conn;
     }
 
+    
+    public function updateOverdueLateFees(): void
+    {
+        try {
+            $sql = "UPDATE borrowings br
+                    INNER JOIN members m
+                    ON br.member_id = m.member_id
+                    INNER JOIN member_fee mf
+                    ON m.fee_id = mf.fee_id
+                    SET br.late_fee =
+                    DATEDIFF(CURDATE(), br.due_date)
+                    * mf.late_fee_per_day
+                    WHERE br.return_date IS NULL
+                    AND br.due_date < CURDATE()";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+
+        } catch (PDOException $e) {
+            echo "Error updating overdue fees: "
+                . $e->getMessage() . "\n";
+        }
+    }
+
+
     public function showAll(): void
     {
         try {
+            
+            $this->updateOverdueLateFees();
             $sql = "SELECT
                         br.borrowing_id,
                         m.name AS member_name,
@@ -195,25 +222,45 @@ class Borrowing
     
     public function returnBook(int $borrowingId): void
     {
+        while (true) {
+            $lostInput = strtolower(trim(readline(
+                "Was the borrowed book lost? (y/n): "
+            )));
+
+            if ($lostInput === 'y' || $lostInput === 'yes') {
+                $reportedLost = true;
+                break;
+            }
+
+            if ($lostInput === 'n' || $lostInput === 'no') {
+                $reportedLost = false;
+                break;
+            }
+
+            echo "Please enter y or n.\n";
+        }
+
         try {
             $this->conn->beginTransaction();
 
-            
             $sql = "SELECT
-            br.borrowing_id,
-            br.member_id,
-            br.book_id,
-            br.copy_id,
-            br.due_date,
-            m.category
-            FROM borrowings br
-            JOIN members m
-            ON br.member_id = m.member_id
-            WHERE br.borrowing_id = :id
-            AND br.return_date IS NULL
-            FOR UPDATE";
-
-            //$this->conn->commit();
+                        br.borrowing_id,
+                        br.member_id,
+                        br.book_id,
+                        br.copy_id,
+                        br.due_date,
+                        br.lost_fee AS recorded_lost_fee,
+                        m.category,
+                        b.title AS book_title,
+                        b.price AS book_price,
+                        bc.status AS copy_status
+                    FROM borrowings br
+                    JOIN members m ON br.member_id = m.member_id
+                    JOIN books b ON br.book_id = b.book_id
+                    LEFT JOIN book_copies bc ON br.copy_id = bc.copy_id
+                    WHERE br.borrowing_id = :id
+                      AND br.return_date IS NULL
+                    FOR UPDATE";
 
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':id' => $borrowingId]);
@@ -226,19 +273,31 @@ class Borrowing
                 return;
             }
 
+            $existingLostFeeQuery = $this->conn->prepare(
+                "SELECT COUNT(*), COALESCE(SUM(amount), 0)
+                 FROM fees
+                 WHERE borrowing_id = :id
+                   AND fee_type = 'Lost Fee'"
+            );
+            $existingLostFeeQuery->execute([':id' => $borrowingId]);
+            $existingLostFee = $existingLostFeeQuery->fetch(PDO::FETCH_NUM);
+            $existingLostFeeCount = (int) $existingLostFee[0];
+            $lostFee = (float) $existingLostFee[1];
+            $isLost = $reportedLost
+                || $record['copy_status'] === 'Lost'
+                || $existingLostFeeCount > 0
+                || (float) $record['recorded_lost_fee'] > 0;
+
             $returnDate = date('Y-m-d');
 
-            
             $dueDate = new DateTime($record['due_date']);
             $actualReturnDate = new DateTime($returnDate);
 
             $lateDays = 0;
-
             if ($actualReturnDate > $dueDate) {
                 $lateDays = (int) $dueDate->diff($actualReturnDate)->days;
             }
 
-            
             $expectedLateFee = $lateDays
                 * Fee::lateFeeRateForCategory($record['category']);
 
@@ -253,59 +312,92 @@ class Borrowing
             $additionalLateFee = max(0, $expectedLateFee - $existingLateFee);
             $lateFee = $existingLateFee + $additionalLateFee;
 
-            
-            $sql = "UPDATE borrowings
-                    SET return_date = :return_date,
-                    late_fee = :late_fee
-                    WHERE borrowing_id = :id";
+            if ($isLost && $existingLostFeeCount === 0) {
+                $lostFee = (float) $record['recorded_lost_fee'];
+                if ($lostFee <= 0) {
+                    $lostFee = (float) $record['book_price'];
+                }
 
-            $stmt = $this->conn->prepare($sql);
+                if ($lostFee <= 0) {
+                    throw new RuntimeException(
+                        "The book price must be greater than zero to add a lost-book fee."
+                    );
+                }
 
-            $stmt->execute([
-                ':return_date' => $returnDate,
-                ':late_fee' => $lateFee,
-                ':id' => $borrowingId
-            ]);
-
-            $savedReturnDate = $this->conn->prepare(
-                "SELECT return_date
-                 FROM borrowings
-                 WHERE borrowing_id = :id"
-            );
-            $savedReturnDate->execute([':id' => $borrowingId]);
-            $returnDate = $savedReturnDate->fetchColumn();
-
-            if ($returnDate === false || $returnDate === null) {
-                throw new RuntimeException(
-                    "The return date was not saved for borrowing ID $borrowingId."
+                $insertLostFee = $this->conn->prepare(
+                    "INSERT INTO fees
+                        (borrowing_id, fee_type, amount, fee_date, payment_status)
+                     VALUES (:borrowing_id, 'Lost Fee', :amount, CURDATE(), 'pending')"
                 );
-            }
-
-            
-            $sql = "UPDATE book_copies
-                    SET status= 'Available'
-                    WHERE copy_id=:copy_id
-                    AND status='Borrowed'";
-                   
-
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':copy_id' => $record['copy_id']]);
-
-            
-            if ($additionalLateFee > 0) {
-                $sql = "INSERT INTO fees(borrowing_id, fee_type, amount, fee_date,payment_status)
-                        VALUES(:borrowing_id, 'Late fee', :amount,:fee_date, 'pending')";
-
-                $stmt = $this->conn->prepare($sql);
-
-                $stmt->execute([
+                $insertLostFee->execute([
                     ':borrowing_id' => $borrowingId,
-                    ':amount' => $additionalLateFee,
-                    ':fee_date' => $returnDate
+                    ':amount' => $lostFee
+                   
                 ]);
             }
 
-           
+            $updateBorrowing = $this->conn->prepare(
+                "UPDATE borrowings
+                 SET return_date = :return_date,
+                     late_fee = :late_fee,
+                     lost_fee = :lost_fee
+                 WHERE borrowing_id = :id"
+            );
+            $updateBorrowing->execute([
+                ':return_date' => $returnDate,
+                ':late_fee' => $lateFee,
+                ':lost_fee' => $lostFee,
+                ':id' => $borrowingId
+            ]);
+
+            if ($record['copy_id'] !== null
+                && $record['copy_status'] === 'Borrowed') {
+                $copyStatus = $isLost ? 'Lost' : 'Available';
+                $updateCopy = $this->conn->prepare(
+                    "UPDATE book_copies
+                     SET status = :status
+                     WHERE copy_id = :copy_id
+                       AND status = 'Borrowed'"
+                );
+                $updateCopy->execute([
+                    ':status' => $copyStatus,
+                    ':copy_id' => $record['copy_id']
+                ]);
+
+                if ($updateCopy->rowCount() !== 1) {
+                    throw new RuntimeException(
+                        "Could not update the status of copy "
+                        . $record['copy_id'] . "."
+                    );
+                }
+            } elseif ($record['copy_id'] !== null
+                && ($record['copy_status'] !== 'Lost' || !$isLost)) {
+                throw new RuntimeException(
+                    "The borrowed copy is not marked as Borrowed or Lost."
+                );
+            }
+
+            if ($additionalLateFee > 0) {
+                $insertLateFee = $this->conn->prepare(
+                    "INSERT INTO fees
+                        (borrowing_id, fee_type, amount, fee_date, payment_status)
+                     VALUES (:borrowing_id, 'Late fee', :amount, CURDATE(), 'pending')"
+                );
+                $insertLateFee->execute([
+                    ':borrowing_id' => $borrowingId,
+                    ':amount' => $additionalLateFee
+                    
+                ]);
+            }
+
+            $feeQuery = $this->conn->prepare(
+                "SELECT fee_type, amount, payment_status, payment_date
+                 FROM fees
+                 WHERE borrowing_id = :id
+                 ORDER BY fee_id"
+            );
+            $feeQuery->execute([':id' => $borrowingId]);
+            $fees = $feeQuery->fetchAll(PDO::FETCH_ASSOC);
 
             $this->conn->commit();
 
@@ -313,18 +405,46 @@ class Borrowing
 
             echo "\n========== BOOK RETURN DETAILS ==========\n";
             echo "Borrowing ID: " . $borrowingId . "\n";
+            echo "Book: " . $record['book_title'] . "\n";
+            echo "Book Status: " . ($isLost ? 'Lost' : 'Returned') . "\n";
             echo "Due Date: " . $record['due_date'] . "\n";
             echo "Return Date: " . $returnDate . "\n";
             echo "Overdue Days: " . $lateDays . "\n";
             echo "Late Fee Per Day: Rs. " . number_format($dailyRate, 2) . "\n";
             echo "Calculated Late Fee: Rs. " . number_format($expectedLateFee, 2) . "\n";
             echo "Total Late Fee Recorded: Rs. " . number_format($lateFee, 2) . "\n";
-            echo "\nBook returned successfully!\n";
-            //echo "Return Date: " . $returnDate . "\n";
+            echo $isLost
+                ? "\nBorrowing record closed; the book was marked as lost.\n"
+                : "\nBook returned successfully!\n";
             echo "Late Fee for This Book: Rs. "
                 . number_format($lateFee, 2) . "\n";
 
-            // Display the member's late fees for all borrowed books
+            if ($isLost) {
+                echo "Lost Fee: Rs. "
+                    . number_format($lostFee, 2) . "\n";
+            }
+
+            echo "\n========== FEE PAYMENT DETAILS ==========\n";
+            if (empty($fees)) {
+                echo "No fees recorded for this borrowing.\n";
+            }
+            foreach ($fees as $fee) {
+                $paymentStatus = strtolower((string) $fee['payment_status']);
+                if ($paymentStatus === 'pending') {
+                    $paymentStatus = 'Unpaid';
+                } else {
+                    $paymentStatus = ucfirst($paymentStatus);
+                }
+
+                echo "Fee Type: " . $fee['fee_type'] . "\n";
+                echo "Amount: Rs. "
+                    . number_format((float) $fee['amount'], 2) . "\n";
+                echo "Payment Status: " . $paymentStatus . "\n";
+                echo "Payment Date: "
+                    . ($fee['payment_date'] ?? 'Not paid') . "\n";
+                echo "-----------------------------------------\n";
+            }
+
             $this->showMemberLateFeeSummary(
                 (int) $record['member_id']
             );
