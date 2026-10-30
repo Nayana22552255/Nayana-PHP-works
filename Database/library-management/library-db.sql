@@ -22,6 +22,8 @@ physical_format varchar(50),
 description text,
 price decimal(10.2)not null default 0);*/
 
+#alter table books  modify column publication_year smallint;
+
 #alter table books add column available tinyint(1) not null default 1;
 
 #select *from library_db.borrowings;
@@ -162,9 +164,9 @@ set foreign_key_checks = 1;*/
 
 #update  borrowings set  due_date = '2026-10-25' where  borrowing_id = 1;
 
-update  borrowings set  borrow_date = '2026-10-10' where  borrowing_id = 9;
+#update  borrowings set  borrow_date = '2026-10-10' where  borrowing_id = 9;
 
-update  borrowings set  due_date = '2026-10-20' where  borrowing_id = 9;
+#update  borrowings set  due_date = '2026-10-20' where  borrowing_id = 9;
 
 /*create table  member_fee (
 fee_id int auto_increment primary key,
@@ -229,6 +231,21 @@ genre_id int not null,
 primary key(book_id, genre_id),
 foreign key(book_id) references books(book_id),
 foreign key(genre_id) references genres(genre_id));*/
+
+
+/*SET SQL_SAFE_UPDATES = 0;
+DELETE FROM book_authors;
+SET SQL_SAFE_UPDATES = 1;*/
+
+/*SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE authors;
+SET FOREIGN_KEY_CHECKS = 1;*/
+
+#alter table book_copies add column  inventory_date date default null;
+
+#update  borrowings set  borrow_date = '2026-10-25' where  borrowing_id = 2;
+
+#update  borrowings set  due_date = '2026-10-27' where  borrowing_id = 2;
 
 
 
