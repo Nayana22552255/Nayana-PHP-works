@@ -38,8 +38,7 @@ class Book
         foreach ($genres as $genre) {
             echo "Genre Id: " . $genre['genre_id'] . "\n";
             echo "Genre Name: " . $genre['genre_name'] . "\n";
-            echo "Parent Genre: "
-                . ($genre['parent_genre'] ?? 'None') . "\n";
+            echo "Parent Genre: ". ($genre['parent_genre'] ?? 'None') . "\n";
         }
     }
 
@@ -435,8 +434,8 @@ class Book
     public function search(string $keyword): void
     {
         $sql = "SELECT b.book_id, b.title,
-                       b.publication_year, b.physical_format, b.price,
-                       b.genre_id, g.genre_name
+                b.publication_year, b.physical_format, b.price,
+                b.genre_id, g.genre_name
                 FROM books b
                 LEFT JOIN genres g ON b.genre_id = g.genre_id
                 WHERE b.title LIKE :keyword
@@ -474,11 +473,11 @@ class Book
             "SELECT b.*,
             GROUP_CONCAT(a.author_name ORDER BY a.author_name SEPARATOR ', ')
             AS author_names
-             FROM books b
-             LEFT JOIN book_authors ba ON b.book_id = ba.book_id
-             LEFT JOIN authors a ON ba.author_id = a.author_id
-             WHERE b.book_id = ?
-             GROUP BY b.book_id"
+            FROM books b
+            LEFT JOIN book_authors ba ON b.book_id = ba.book_id
+            LEFT JOIN authors a ON ba.author_id = a.author_id
+            WHERE b.book_id = ?
+            GROUP BY b.book_id"
         );
         $stmt->execute([$book_id]);
         $book = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -555,13 +554,13 @@ class Book
         }
 
         echo "Current author(s): " . ($book['author_names'] ?? 'Not assigned') . "\n";
-        echo "Press Enter or enter K to keep current authors; enter X to remove all authors, or add IDs/new authors to replace the author list.\n";
+        echo "\n Press Enter or enter K to keep current authors; enter X to remove all authors, or add IDs/new authors to replace the author list.\n";
         (new Author($this->conn))->showAll();
         $authorChoices = [];
         $selectedAuthorIds = [];
         $replaceAuthors = false;
         $authorInput = trim(readline(
-            "Author ID, N for a new author, K/Enter to keep, or X to remove all: "
+            "\n Author ID, N for a new author, K/Enter to keep, or X to remove all: "
         ));
 
         if ($authorInput !== '' && strcasecmp($authorInput, 'K') !== 0) {
