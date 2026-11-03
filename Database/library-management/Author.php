@@ -45,6 +45,7 @@ class Author
                     echo "Author ID: ".$author['author_id'], "\n";
                     echo "Author Name: ".$author['author_name']. "\n";
                     echo "Biography: ".($author['biography'] ?? 'Not available'). "\n";
+                    echo "------------------------------\n";
                 }
     }
 
@@ -69,6 +70,7 @@ class Author
 
                 foreach($authors as $author)
                     {
+                        echo "-----------------------------------\n";
                         echo "Author Id:".$author['author_id']. "\n";
                         echo "Autor name:".$author['author_name']. "\n";
                         echo "Biography: ".($author['biography']?? 'Not avilable'). "\n";
@@ -100,41 +102,6 @@ class Author
 
 
     }
-
-   /* public function showAuthorsWithBooks(): void
-    {
-    $sql = "SELECT
-                a.author_id,
-                a.author_name,
-                a.biography,
-                GROUP_CONCAT( b.title SEPARATOR ', ') AS book_names
-                FROM authors a
-                LEFT JOIN book_authors ba
-                ON a.author_id = ba.author_id
-                LEFT JOIN books b
-                ON ba.book_id = b.book_id
-                GROUP BY
-                a.author_id,
-                a.author_name,
-                a.biography
-                ORDER BY a.author_id";
-
-    $stmt = $this->conn->query($sql);
-    $authors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (empty($authors)) {
-        echo "No authors found.\n";
-        return;
-    }
-
-    foreach ($authors as $author) {
-        echo "-------------------------\n";
-        echo "Author ID: " . $author['author_id'] . "\n";
-        echo "Author Name: " . $author['author_name'] . "\n";
-        echo "Biography: " . ($author['biography'] ?? 'Not available'). "\n";
-        echo "Book Name(s): ". ($author['book_names'] ?? 'No books assigned') . "\n";
-    }
-    }*/
 
     public function delete(int $authorId):void
     {
