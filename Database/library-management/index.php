@@ -155,6 +155,7 @@ try
                         echo "------------------\n";
                         break;
             case 2:
+                        echo "-----------------------------------\n";
                         $title=trim(readline("Enter book title: "));
 
                         while (true) {
@@ -208,6 +209,7 @@ try
                         break;
                     
             case 6:
+                        echo "--------------------------------------------\n";
                         $name=readline("Enter the author name: ");
                         $title=readline("Enter the title of the book");
                         $biography=readline("enter the Biography: ");
@@ -221,24 +223,31 @@ try
                         echo "----------------------------------------------\n";
                         break;
 
-            case 8:     $keyword=trim(readline("Enter the author name or keyword: "));
+            case 8:     echo "-----------------------------------------------\n";
+                        $keyword=trim(readline("Enter the author name or keyword: "));
                         $author->search($keyword);
                         echo "--------------------------------------------------\n";
                         break;
 
-            case 9:     $authorId=(int)readline("enter the id: ");
+            case 9:    
+                        echo "---------------------------------------------------\n";
+                        $authorId=(int)readline("enter the id: ");
                         $name=trim(readline("enter the author name: ")); 
                         $biography=trim(readline("enter the biography: "));
                         $biography=$biography === "" ? null : $biography;
                         $author->update($authorId,$name,$biography);
                         echo "---------------------------------------------------\n";
                         break;
+                        
             case 10:
+                        echo "---------------------------------------------------\n";
                         $authorId=(int)readline("enter the author id: ");
                         $author->delete($authorId);
                         echo "---------------------------------------------------\n";
                         break;
+
             case 11:
+                        echo "---------------------------------------------------\n";
                         $name=trim(readline("enter the genre name: "));
                         $parentIdInput=trim(readline("enter the parent id, or leave blank for none: "));
                         $parentId=$parentIdInput === "" ? null : (int)$parentIdInput;
@@ -250,12 +259,16 @@ try
                         echo "---------------------------------------------------\n";
                         break;
 
-            case 13:    $keyword=readline("enter the keyword for searching the genre: ");
+            case 13:    
+                        echo "---------------------------------------------------\n";
+                        $keyword=readline("enter the keyword for searching the genre: ");
                         $genre->search($keyword);
                         echo "---------------------------------------------------\n";
                         break;
 
-            case 14:    $genreId=(int)readline("enter the genre id: ");
+            case 14:    
+                        echo "---------------------------------------------------\n";
+                        $genreId=(int)readline("enter the genre id: ");
                         $name=trim(readline("enter the genre name: "));
                         $parentIdInput=trim(readline("enter the parent id, or leave blank for none: "));
                         $parentId=$parentIdInput === "" ? null : (int)$parentIdInput;
@@ -263,12 +276,15 @@ try
                         echo "---------------------------------------------------\n";
                         break;
 
-            case 15:    $genreId=(int)readline("enter the genreId: ");
+            case 15:    
+                        echo "---------------------------------------------------\n";
+                        $genreId=(int)readline("enter the genreId: ");
                         $genre->delete($genreId);
                         echo "---------------------------------------------------\n";
                         break;
 
             case 16:
+                        echo "---------------------------------------------------\n";
                         $name=readline("Enter the member name: ");
                         $email=readline("Enter the email: ");
                         $phone=readline("Enter the phone: ");
@@ -284,13 +300,16 @@ try
                         break;
                     
             case 18:
+                        echo "---------------------------------------------------\n";
                         $keyword=readline("Enter the keyword for searching\n");
                         $member->searchMember($keyword);
                         echo "---------------------------------------------------\n";
                         break;
             
 
-            case 19:    $memberId=(int)readline("Enter the member Id: ");
+            case 19:    
+                        echo "---------------------------------------------------\n";
+                        $memberId=(int)readline("Enter the member Id: ");
                         $name=readline("Enter the Name: ");
                         $email=readline("enter a email: ");
                         $phone=readline("enter the phone number: ");
@@ -302,6 +321,7 @@ try
                         break;
                        
             case 20:
+                        echo "---------------------------------------------------\n";
                         $memberId=(int)readline("Enter the members id: ");
                         $status=strtolower(trim(readline("Enter status (active/inactive): ")));
                         if($status !== 'active' && $status !== 'inactive')
@@ -315,6 +335,7 @@ try
                         break;
 
             case 21:
+                        echo "---------------------------------------------------\n";
                         $memberId=(int)readline("Enter the member id for deleting: ");
                         $member->deleteMember($memberId);
                         echo "---------------------------------------------------\n";
@@ -324,13 +345,15 @@ try
                         echo "---------------------------------------------------\n";
                         break;
 
-            case 23:    $memberId=(int)readline("enter the memeber id: ");
+            case 23:    echo "---------------------------------------------------\n";
+                        $memberId=(int)readline("enter the memeber id: ");
                         $bookId=(int)readline("enter the book id: ");
                         $borrowing->borrow($memberId,$bookId);
                         echo "---------------------------------------------------\n";
                         break;
 
-            case 24:    $borrowingId=(int)readline("Enter the borrowing id: ");
+            case 24:    echo "---------------------------------------------------\n";
+                        $borrowingId=(int)readline("Enter the borrowing id: ");
                         $borrowing->returnBook($borrowingId);
                         echo "---------------------------------------------------\n";
                         break;
@@ -341,40 +364,38 @@ try
                         break;
                 
             case 26:
+                        echo "---------------------------------------------------\n";
                         $keyword=readline("enter a keyword for searching a fee: ");
                         $fee->search($keyword);
                         echo "---------------------------------------------------\n";
                         break;
-            
-            /*case 27:
-                        $borrowingId=(int)readline("enter the Id: ");
-                        $fee->addLateFee($borrowingId);
-                        break;*/
+           
 
             case 28:
+                        echo "---------------------------------------------------\n";
                         $borrowingId=(int)readline("Enter the borrowing id: ");
                         $fee->addLostFee($borrowingId);
                         echo "---------------------------------------------------\n";
                         break;
 
             case 29:
+                        echo "---------------------------------------------------\n";
                         $feeId=(int)readline("Enter the fee id: ");
                         $fee->markPaid($feeId);
                         echo "---------------------------------------------------\n";
                         break;
             
-            /*case 30:
-                        $feeId=(int)readline("Enter the fee id: ");
-                        $fee->waiveFee($feeId);
-                        break;*/
+           
 
             case 30:
+                        echo "---------------------------------------------------\n";
                         $memberId = (int) readline("Enter the member ID: ");
                         $borrowing->viewAllMemberFines($memberId);
                         echo "---------------------------------------------------\n";
                         break;
 
             case 31:
+                        echo "---------------------------------------------------\n";
                         $memberId=(int)readline("Enter Member ID: ");
                         $borrowing->showMemberBorrowingHistory($memberId);
                         echo "---------------------------------------------------\n";
