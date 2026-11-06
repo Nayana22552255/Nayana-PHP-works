@@ -19,7 +19,7 @@ price DECIMAL(10,2)NOT NULL,
 quantity INT DEFAULT 0,
 minimum_stock INT DEFAULT 5);*/
 
---SELECT *FROM products;
+SELECT *FROM products;
 
 /*CREATE TABLE stock_transactions(transaction_id SERIAL PRIMARY KEY,
 product_id INT REFERENCES products(product_id),
@@ -29,5 +29,13 @@ quantity INT NOT NULL CHECK(quantity > 0),
 transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);*/
 
 --SELECT *FROM stock_transactions;
+
+/*INSERT INTO categories(category_name)VALUES
+('Electronics'),
+('Furnitures'),
+('Stationary'),
+('Clothing'),
+('Accessories'),
+('Home Appliances');*/
 
 
