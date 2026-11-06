@@ -69,7 +69,7 @@ department_name VARCHAR(100),
 deparment_code VARCHAR(20)UNIQUE
 );*/
 
-SELECT *FROM departments;
+--SELECT *FROM departments;
 
 --ALTER TABLE students DROP COLUMN course_name;
 
@@ -88,4 +88,4 @@ UNIQUE (student_id, attendance_date);*/
 
 --ALTER TABLE departments ADD COLUMN department_code VARCHAR(10) UNIQUE;
 
-ALTER TABLE  departments DROP COLUMN deparment_code;
+--ALTER TABLE  departments DROP COLUMN deparment_code;
