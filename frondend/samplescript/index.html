@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Student Management</title>
+    </head>
+
+    <body>
+
+        <h1>Student Mangement System</h1>
+
+        <input type="text" id="studentName" placeholder="Enter Student Name">
+
+        <button onclick="addStudent()">Add Student</button>
+
+        <h2>Student List</h2>
+        <ul id="studentList"></ul>
+
+        <script>
+
+            let students=[];
+            function addStudent()
+            {
+                let name=document.getElementById("studentName").value;
+
+                if(name.trim() === " ")
+            {
+                alert("please Enter Student Name");
+                return;
+            }
+
+            students.push(name);
+            displayStudents();
+            document.getElementById("studentName").value= " ";
+            }
+
+            function displayStudents()
+            {
+                let list=document.getElementById("studentList");
+                list.innerHTML="";
+        
+
+            students.forEach(function(student)
+            {
+                let li=document.createElement("li");
+                li.textContent=student;
+                list.appendChild(li);
+            });
+        }
+        </script>
+    </body>
+    
+</html>
