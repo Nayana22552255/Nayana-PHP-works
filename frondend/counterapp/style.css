@@ -1,0 +1,61 @@
+body{
+    background-color: palevioletred;
+    font-family:  sans-serif;
+    text-align: center;
+}
+
+.container{
+    background-color: aliceblue;
+    width: 350px;
+    margin: 100px auto;
+    padding: 100px ;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    margin-top: 250px;
+    
+   
+}
+
+h1{
+    color: blueviolet;
+
+}
+
+#count {
+    font-size: 50px;
+    color: blueviolet;
+    font-weight: bold;
+}
+
+button {
+    padding: 12px 18px;
+    margin: 8px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid black;
+
+
+}
+
+.increase {
+    background-color: green;
+    color: white;
+    
+}
+
+.decrease {
+    background-color: red;
+    color: white;
+}
+
+.reset {
+    background-color:gray;
+    color: white;
+}
+
+.button:hover{
+    opacity: 0.7;
+}
