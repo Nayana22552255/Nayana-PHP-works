@@ -71,7 +71,8 @@ try
                 3 => ['label' => 'Search for a Member', 'action' => 18],
                 4 => ['label' => 'Update a Member', 'action' => 19],
                 5 => ['label' => 'Set Member Status', 'action' => 20],
-                6 => ['label' => 'Delete a Member', 'action' => 21]
+                6 => ['label' => 'Delete a Member', 'action' => 21],
+                7=>['label'=>'Total Books Borrowd','action'=>34]
             ]
         ],
         5 => [
@@ -81,7 +82,10 @@ try
                 2 => ['label' => 'Borrow a Book', 'action' => 23],
                 3 => ['label' => 'Return a Book', 'action' => 24],
                 4 => ['label' => 'View All Fines of a Member', 'action' => 30],
-                5 => ['label' => 'View Member Borrowing History', 'action' => 31]
+                5 => ['label' => 'View Member Borrowing History', 'action' => 31],
+                6 => ['label' => 'View Borrowing Days', 'action' => 35]
+
+
 
             ]
         ],
@@ -409,6 +413,15 @@ try
             case 33:
                         $bookinventory->menu();
                         break;
+
+            case 34: 
+                        $member->showBorrowedBookCount();
+                        break;
+
+            case 35:
+                        $borrowing->showBorrowingDays();
+                        break;
+
                 
             default:
                         echo "Invalid choice. Please select 1-21.\n";

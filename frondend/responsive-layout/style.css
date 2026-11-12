@@ -1,0 +1,31 @@
+body{
+    background-color: darkolivegreen;
+    font-family: Arial, Helvetica, sans-serif;
+}
+h1{
+    text-align: center;
+    color: chocolate;
+}
+.responsive{
+    display: flex;
+    gap: 20px;
+}
+.box{
+    background-color: lightblue;
+    padding: 40px;
+    flex: 1;
+    text-align: center;
+}
+.box:hover{
+    width: 300px;
+    color: red;
+}
+
+@media screen and(max-width:1024px){
+    .container{
+        flex-direction: column;
+    }
+    .box{
+        background-color: blue;
+    }
+}

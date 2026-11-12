@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sample College Page</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Sample Information Page">
+    </head>
+        <boady>
+            <!--header-->
+            <header>
+                <h1>Sample collge  Page</h1>
+                <p>welcome to a collge page</p>
+                <hr>
+            </header>
+            
+            <!--Navigation-->
+            <nav>
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#courses">Couses</a>
+                <a href="#student">Student</a>
+                <a href="#register">Register</a>
+                <a href="#contact">contact</a>
+            </nav>
+            <hr>
+
+            <!--Home-->
+            <section id="home">
+                <h2>welcome to our Collge</h2>
+                <p>Our Collge is top number one in kannur.</p>
+            </section>
+            <hr>
+
+            <!--Student-->
+            <section id="about">
+                <h2>About us</h2>
+                <h3>Computer science Department</h3>
+                <p>We offer different computer science courses</p>
+                <p><b>our Mission:</b>provide quality education</p>
+                <p><strong>our vision:</strong>Developed skilled professionals</p>
+                <p><i>Learn,practice and Achieve</i></p>
+                <p><em>Education is the key to success</em></p>
+            </section>
+            <hr>
+
+            <!--course-->
+            <section id="courses">
+                <h2>Available Courses</h2>
+                <h3>List of courses</h3>
+                <!--unorderd list-->
+                <ul>
+                    <li>Python full Stack</li>
+                    <li>Data science</li>
+                    <li>MERN stack</li>
+                </ul>
+
+                <!--orderd list-->
+                <ol>
+                    <li>HTML</li>
+                    <li>CSS</li>
+                    <li>PHP</li>
+                </ol>
+            </section>
+            <hr>
+
+            <!--links and button field-->
+            <section>
+                <h2>Useful links</h2>
+                <a href="https://www.google.com">Visit Google</a>
+                <br><br>
+
+                
+            </section>
+            <hr>
+            <!--image-->
+            <section>
+                <h2>College image</h2>
+                <img src="admin.png"
+                alt="College image"
+                width="300">
+            </section>
+            <hr>
+
+            <!--vedio and audio-->
+            <section>
+                <h2>Media Section</h2>
+                <h3>college vedio</h3>
+                <vedio width="300"controls>
+                    <source src="image.mp4" type="vedio/mp4">
+                </vedio>
+
+                <h3>Audio</h3>
+                <audio controls>
+                    <source src="music.mp3" type="audio/mpeg">
+                </audio>
+            </section>
+            <hr>
+
+            <!--student table-->
+            <section id="student">
+                <h2>Student details</h2>
+                    <table border="2">
+                        <thead>
+                            <tr>
+                                <th>Student Id</th>
+                                <th>Name</th>
+                                <th>Courses</th>
+                                <th>Marks</th>
+                            </tr>
+                         </thead>
+
+                            <tbody>
+                                <tr>
+                                <td>101</td>
+                                <td>Jack Smith</td>
+                                <td>Python full stack</td>
+                                <td>100</td>
+                                </tr>
+
+                                <tr>
+                                    <td>102</td>
+                                    <td>SamSon</td>
+                                    <td>MERN stack</td>
+                                    <td>80</td>
+                                </tr>
+                            </tbody>
+                    </table>
+            </section>
+            <hr>
+
+            <!--Registration form-->
+            <section id="register">
+                <h2>Student registration form</h2>
+
+                <form>
+                    <label for="name">Student Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter name"  required>
+                    <br><br>
+
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter email">
+                    <br><br>
+
+                    <label for="password">Password:</label>
+                    <input typde="password" id="password" name="password" placeholder="password" required>
+                    <br><br>
+
+                    <label fro="course">Select Course:</label>
+                    <select id="course" name="course">
+                        <option value="">Select a course</option>
+                        <option value="pfs">Python full stack</option>
+                        <option value="mern">MERN Stack</option>
+                        <option value="ds">Data Science</option>
+                    </select>
+                    <br><br>
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="4" cols="30"></textarea>
+                    <br><br>
+
+                    <input type="checkbox" name="agree">
+                    I agree to the terms and conditions
+                    <br><br>
+
+                    <button type="button" onclick="alert('Registration successful')">Register</button>
+                    <button type="reset">Clear</button>
+                </form>
+            </section>
+
+            <!--Div-->
+            <div>
+                <h2>Our facilities</h2>
+                <p>Library</p>
+                <p>Computer lab</p>
+                <p>Sports</p>
+            </div>
+
+            <!--footer-->
+            <footer id="contact">
+                <h3>Contact Us</h3>
+                <p>Email: college@gmail.com</p>
+                <p>Phone: 7890123654</p>
+            </footer>
+        </body>
+   
+</html>

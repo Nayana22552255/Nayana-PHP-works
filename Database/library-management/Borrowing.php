@@ -782,6 +782,48 @@ private function getAvailableCopyCount(int $bookId): int
 
     return (int) $stmt->fetchColumn();
 }
+public function showBorrowingDays(): void
+{
+    $sql = "SELECT
+                br.borrowing_id,
+                m.name AS member_name,
+                b.title AS book_title,
+                br.borrow_date,
+                br.return_date,
+                DATEDIFF(
+                    COALESCE(br.return_date, CURDATE()),
+                    br.borrow_date
+                ) AS days_held
+            FROM borrowings br
+            JOIN members m ON br.member_id = m.member_id
+            JOIN books b ON br.book_id = b.book_id
+            ORDER BY br.borrowing_id DESC";
+
+    $stmt = $this->conn->query($sql);
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($records)) {
+        echo "No borrowing records found.\n";
+        return;
+    }
+
+    foreach ($records as $record) {
+        echo "-----------------------------\n";
+        echo "Borrowing ID: " . $record['borrowing_id'] . "\n";
+        echo "Member Name: " . $record['member_name'] . "\n";
+        echo "Book Title: " . $record['book_title'] . "\n";
+        echo "Borrow Date: " . $record['borrow_date'] . "\n";
+
+        if ($record['return_date'] === null) {
+            echo "Return Status: Not Returned\n";
+        } else {
+            echo "Return Date: " . $record['return_date'] . "\n";
+            echo "Return Status: Returned\n";
+        }
+
+        echo "Days Held: " . $record['days_held'] . " days\n";
+    }
+}
 
 public function showMemberBorrowingHistory(int $memberId):void
 {

@@ -303,5 +303,35 @@ class member
                 echo "Error deleting member".$e->getMessage(). "\n";
         }
     }
+
+    public function showBorrowedBookCount(): void 
+    {
+        $sql="SELECT 
+                    m.member_id,
+                    m.name,
+                    COUNT(b.borrowing_id) AS books_taken
+                    FROM members m
+                    LEFT JOIN borrowings b
+                    ON m.member_id=b.member_id
+                    AND b.return_date IS NULL 
+                    GROUP BY m.member_id,m.name
+                    ORDER BY m.member_id";
+
+        $stmt=$this->conn->query($sql);
+        $members=$stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if(empty($members))
+            {
+                echo "No members found\n";
+                return;
+            }
+        foreach($members as $member)
+            {
+                echo "---------------------\n";
+                echo "Member ID: ".$member['member_id']. "\n";
+                echo "Member Name: ".$member['name']. "\n";
+                echo "Currently Borrowed Books: ".$member['books_taken']. "\n";
+            }
+    }
 }
 ?>

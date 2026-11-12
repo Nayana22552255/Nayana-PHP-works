@@ -54,6 +54,11 @@ max_books int not null default 3,
 laon_days int not null default 14,
 acctive tinyint(1)not null default 1);*/
 
+-- alter table members drop column max_books;
+-- alter table members drop column loan_days;
+-- alter table members drop column category;
+-- DESCRIBE members;
+
 #alter table members rename column laon_days  to loan_days;
 #alter table  members rename column acctive to active;
 
@@ -173,6 +178,12 @@ fee_id int auto_increment primary key,
 member_category varchar(30)not null unique,
 late_fee_per_day decimal(10,2)not null
 );*/
+-- alter table members rename column fee_id to category_id;
+
+-- alter table member_fee add column max_books int;
+-- alter table member_fee add column loan_days int;
+
+-- alter table member_fee  rename column fee_id to category_id;
 
 #insert into  member_fee (member_category, late_fee_per_day)
 #values('Staff', 7.00),('Research', 5.00),('Post Graduate', 3.00),('Undergraduate', 2.00);

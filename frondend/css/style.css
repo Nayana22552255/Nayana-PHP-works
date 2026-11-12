@@ -1,0 +1,20 @@
+body{
+    background-color: lightblue;
+    font-family: Arial;
+}
+
+h1,h2{
+    text-align:center;
+    color:  blue;
+}
+.student{
+    background-color: white;
+    width: 300px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 2px solid black;
+}
+.student p{
+    color: green;
+    font-size: 18px;
+}
