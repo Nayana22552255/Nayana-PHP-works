@@ -1,0 +1,182 @@
+
+/* Main background */
+body {
+    margin: 0;
+    min-height: 100vh;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+
+    background:
+    radial-gradient(circle at top, #36105d, #10051d 50%, #000000);
+}
+
+/* Calculator body */
+.calculator {
+    position: relative;
+    width: 500px;
+    height: 1000p;
+    padding: 30px;
+    padding-bottom: 60px;
+    text-align: center;
+
+    background: linear-gradient(145deg, #17131f, #050507);
+
+    border: 2px solid #a020f0;
+    border-radius: 30px;
+
+    box-shadow:
+        0 0 10px #a020f0,
+        0 0 25px #8000ff,
+        0 0 45px #6500a8,
+        inset 0 0 20px #32104d;
+    
+    animation: float 4s ease infinite;
+}
+@keyframes float {
+    0%{
+        transform: translateY(0);
+    }
+    50%{
+        transform: translateY(-20px);
+    }
+    100%{
+        transform: translateY(0);
+    }
+}
+
+/* Panther image */
+.panther img {
+    width: 180px;
+    height: auto;
+    margin-top: -100px;
+    margin-bottom: 5px;
+
+    filter:
+        drop-shadow(0 0 8px #b000ff)
+        drop-shadow(0 0 15px #8500ff);
+}
+
+/* Heading */
+h1 {
+    color: #e5c7ff;
+    font-size: 23px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #a020f0;
+    margin: 5px 0;
+}
+
+h3 {
+    color: #bc75ff;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+/* Calculator display */
+#display {
+    width: 100%;
+    height: 75px;
+    box-sizing: border-box;
+
+    background: #10091b;
+    border: 2px solid #a020f0;
+    border-radius: 18px;
+
+    color: #e9caff;
+    font-size: 35px;
+    text-align: right;
+    padding: 15px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 0 10px #a020f0,
+        inset 0 0 15px #39075e;
+}
+
+/* Button grid */
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* Normal buttons */
+button {
+    height: 52px;
+
+    border: 1px solid #73508e;
+    border-radius: 15px;
+
+    background: linear-gradient(145deg, #29242f, #100e15);
+
+    color: #f3eaff;
+    font-size: 21px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 8px #000,
+        0 0 5px #8a28c7;
+
+    transition: 0.2s;
+}
+
+/* Hover effect */
+button:hover {
+    background: #511080;
+    color: white;
+
+    box-shadow:
+        0 0 10px #a020f0,
+        0 0 20px #a020f0;
+
+    transform: translateY(-3px);
+}
+
+/* AC and DEL */
+.clear {
+    background: linear-gradient(145deg, #9e20ec, #4d087e);
+    border-color: #c15cff;
+    box-shadow: 0 0 12px #a020f0;
+}
+
+/* Operators */
+.operator {
+    color: #d9a8ff;
+    border-color: #a020f0;
+}
+
+/* Zero button */
+.zero {
+    grid-column: span 1;
+}
+
+/* Equal button */
+.equal {
+    grid-column: span 2;
+
+    background: linear-gradient(145deg, #a020f0, #51008b);
+    color: white;
+
+    border: 1px solid #d49aff;
+
+    box-shadow:
+        0 0 12px #a020f0,
+        0 0 20px #8000ff;
+}
+
+/* Small screens */
+@media (max-width: 400px) {
+    .calculator {
+        width: 85%;
+        padding: 20px 15px;
+    }
+
+    .panther img {
+        width: 150px;
+    }
+}
