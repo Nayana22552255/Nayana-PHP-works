@@ -1,0 +1,192 @@
+body {
+    background-color: #f3f5fa;
+    font-family: 'Segoe UI',Arial,sans-serif;
+    color: #263445;
+}
+
+.container {
+    max-width: 1250px;
+    padding-bottom: 40px;
+}
+
+h1.text-center{
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 32px;
+    letter-spacing: 1px;
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 16px;
+    color: white;
+
+    min-height: 180px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h5 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.dashboard-card h2 {
+    font-size: 35px;
+    font-weight: 700;
+    margin-top: 15px; 
+}
+.dashboard-card p {
+    font-size: 13px;
+    margin-bottom: 0;
+    opacity: 0.9;
+}
+
+.student {
+    background: linear-gradient(135deg,#2563eb, #1d4ed8);
+}
+.teacher {
+    background: linear-gradient(135deg,#10b981, #047857);
+}
+.course {
+    background: linear-gradient(135deg,#f43f5e, #be123c);
+}
+.department {
+    background: linear-gradient(135deg,#64748b, #334155);
+}
+
+.card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: white;
+    padding: 20px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.card-title {
+    color: #263445;
+    font-weight: 700;
+    font-size: 19px;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 16px;
+    border-bottom: 2px solid #e2e8f0;
+
+}
+
+.table tbody td {
+    padding: 16px;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #475569;
+}
+.table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #dce2eb;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.btn {
+    border-radius: 7px;
+    padding: 9px 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.modal-title {
+    font-weight: 700;
+    color: #263445;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    padding: 18px 25px;
+    border-top: 1px solid #edf0f5;
+}
+
+@media (max-width: 768px) {
+
+    h1.text-center {
+        font-size: 24px;
+        padding: 20px !important;
+    }
+
+    .dashboard-card {
+        min-height: 150px;
+    }
+
+    .card-body {
+        padding: 18px;
+    }
+
+    .table {
+        min-width: 650px;
+    }
+
+}
