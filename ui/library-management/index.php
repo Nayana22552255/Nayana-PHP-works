@@ -380,6 +380,7 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
             <td bgcolor="#0c2653"><a href="index.php?page=borrowings"><font color="#ffffff">Borrowing Management</font></a></td>
             <td bgcolor="#0c2653"><a href="index.php?page=fees"><font color="#ffffff">Fine Management</font></a></td>
             <td bgcolor="#0c2653"><a href="index.php?page=inventory"><font color="#ffffff">Book History</font></a></td>
+            <td bgcolor="#0c2653"><a href="Renewal.php"><font color="#ffffff">Book Renewal</font> </a></td>
         </tr>
     </table>
 
@@ -613,3 +614,7 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
 <?php endif; ?>
 </body>
 </html>
+
+
+
+
