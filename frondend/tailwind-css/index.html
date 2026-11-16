@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html class="overscroll-none">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>College Dashboard</title>
+
+        <!--Tailwind CSS-->
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    </head>
+
+
+    <body class="bg-slate-100  min-h-screen">
+
+        <nav class="bg-blue-700 shadow-md px-6 py-4">
+            <div class="w-full flex flex-wrap justify-between items-center gap-4">
+
+                <h1 class="text-3xl  font-large font-bold  text-black-700">
+                        MARY MATHA
+                </h1>
+
+                <button type="button"
+                        id="nav-menu-toggle"
+                        class="md:hidden rounded p-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white"
+                        aria-label="Open navigation menu"
+                        aria-controls="nav-menu"
+                        aria-expanded="false"
+                        onclick="toggleNavMenu()">
+                    <svg id="menu-open-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="menu-close-icon" xmlns="http://www.w3.org/2000/svg" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!--Navigation link-->
+                <div id="nav-menu" class="hidden w-full flex-col items-start gap-4 md:ml-auto md:flex md:w-auto md:flex-row md:items-center md:gap-6">
+                    <a href="index.html"
+                            class="text-black-700   hover:text-white-600 font-medium transition">
+                            
+                    </a>
+
+                    <a href="#registeredUsers"
+                           class="text-xl text-black-700  hover:text-white font-medium transition">
+                            Users
+                    </a>
+                    <a href="#aboutCollege"
+                            class="text-xl text-black-700  hover:text-white font-medium transition">
+                        About
+                    </a>
+
+                    <a href="#coursePricing"
+                       class="text-xl text-black-700  hover:text-white font-medium transition">
+                            Courses
+                        </a>
+
+                    <a href="#departmentSection"
+                            class="text-xl text-black-700  hover:text-white font-medium transition">
+                            Departments
+                    </a>
+
+                    <button onclick="logout()"
+                            class="bg-red-500  text-white  px-4  py-2  rounded-lg  hover:bg-red-600">
+                            Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-10">
+
+            <!--Dschboard Heading-->
+            <h1 class="text-3xl font-bold text-Left text-slate-800 mt-16 mb-2">
+                    College Dashboard
+            </h1>
+            <h3 class="text-black-800 mb-10">
+                View student, teacher, and admin totals, along with your college information, at a glance.
+            </h3>
+
+            <!--dashboard Cards-->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-10">
+                <!--student Card-->
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700
+                          relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                          hover:-translate-y-1 hover:shadow-xl">
+
+                         <i class="fa-solid fa-users text-xl text-white-600 absolute top-6 right-6"></i>
+
+                          <h2 class="text-lg font-medium text-white">Students</h2>
+                          <p id="studentCount" class="text-3xl font-bold text-white">0</p>
+                          <p class="text-sm text-white">Total Registered Students</p>
+                </div>
+
+                <!--Teacher Card-->
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-700
+                           relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                           hover:-translate-y-1 hover:shadow-xl">
+
+                           <i class="fa-solid fa-users text-xl text-white-600 absolute top-6 right-6"></i>
+
+                           <h2 class="text-lg font-medium text-white">Teachers</h2>
+                           <p id="teacherCount"  class="text-3xl font-bold text-white">0</p>
+                           <p class="text-sm text-white">Total Teachers</p>
+
+                </div>
+
+                <!--admin card-->
+                <div class="bg-gradient-to-br  from-purple-500  to-purple-700
+                            relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                            hover:-translate-y-1 hover:shadow-xl">
+
+                     <i class="fa-solid fa-users text-xl text-white-600 absolute top-6 right-6"></i>
+
+
+                        <h2 class="text-lg  font-medium  text-black">
+                                Admins
+                        </h2>
+
+                        <p id="adminCount" class="text-3xl  font-bold  text-black">0</p>
+                        <p class="text-sm  text-white">Total Admins</p>
+
+                </div>
+
+                <!--Total users card-->
+                <div class="bg-gradient-to-br  from-orange-500  to-orange-700
+                            relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                            hover:-translate-y-1 hover:shadow-xl">
+
+                    <i class="fa-solid fa-users text-xl text-white-600 absolute top-6 right-6"></i>
+
+                    <h2 class="text-lg  font-medium">
+                            Total Users
+                    </h2>
+                    <p id="totalUsers"  class="text-3xl  font-bold">0</p>
+                    <p class="text-sm  text-white">All Registered Users</p>
+
+                </div>
+
+            </div>
+
+
+            <!--college profile card-->
+        
+            <div class="bg-white  p-6 rounded-3xl shadow-lg mt-30 mb-10">
+            
+                <!--profile header-->
+                <div class="flex  flex-col  sm:flex-row  items-center gap-4">
+
+                    <img src="image.jpg"
+                            alt="College Logo"
+                            class="w-24 h-24 rounded-full object-cover
+                                    border-2 border-blue-200 shadow-sm">
+                   
+                        <div>
+                            <h2 class="text-2xl  font-bold text-black-800">Mary Matha College</h2>
+ 
+                            <p class="text-gray-500  mt-1">Manathavady, Wayanad, Kerala</p>
+                            <span class="inline-block  bg-green-100 text-green-700
+                                        px-3  py-1  rounded-full  text-medium  mt-2">Active Institution</span>
+
+                        </div>
+
+                    </div>
+
+                    <!--divider-->
+                    <hr class="my-6 mt-10 border-gray-200">
+                    <!--about section-->
+                    <div id="aboutCollege" class="mb-10 scroll-mt-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">About Our College</h3>
+                        <p class="text-black-600 leading-7 text-medium">
+                            Mary Matha College, located in Mananthavady, Wayanad, Kerala, is committed to quality higher
+                            education, academic excellence, practical learning, and the personal growth of every student.
+                        </p>
+
+                    </div>
+
+                    <div class="grid grid-cols-1  sm:grid-cols-2  lg:grid-cols-4  mt-10 gap-5">
+
+                        <div class="bg-blue-50 p-4 rounded-xl">
+                            <h4 class="font-semibold  text-black-800  mb-2">📍 Location</h4>
+                            <p class="text-gray-600  text-sm">Mananthavady,Wayanad</p>
+                        </div>
+
+                        <div class="bg-blue-50  p-4  rounded-xl">
+                            <h4 class="font-semibold text-black-800 mb-2">
+                                        📧 Email
+                                    </h4>
+                                    <p class="text-gray-600 text-sm break-all">
+                                        college@example.com
+                                    </p>
+                        </div>
+
+                        <div class="bg-blue-50  p-4 rounded-xl">
+                            <h4 class="font-semibold  text-black-800  mb-2">📞 Contact</h4>
+                            <p class="text-gray-600 text-sm" >+91 8596974253</p>
+                        </div>
+
+                        <div class="bg-blue-50  p-4 rounded-xl">
+                           <h4 class="font-semibold text-black-800 mb-2">
+                                    🌐 Website
+                                </h4>
+                                <p class="text-gray-600 text-sm break-all">
+                                    www.college.edu
+                                </p> 
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        <!-- Course Pricing Section -->
+
+        <div id="coursePricing" class="mt-20 ">
+
+            <!-- Heading -->
+            <div class="text-center mb-20">
+
+                <h2 class="text-3xl font-bold text-gray-800">
+                    Course Pricing
+                </h2>
+
+                <p class="text-black-500 mt-2 ">
+                    Explore our academic programmes and course fees
+                </p>
+
+            </div>
+
+
+        <!-- Pricing Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-20 px-4 sm:px-6 lg:px-8">
+
+
+            <!-- BCA Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg
+                        border border-black-100 transition duration-300 ease-in-out
+                        hover:-translate-y-1 hover:shadow-2xl w-100 h-100">
+
+                <span class="bg-blue-100 text-blue-700 px-3 py-1
+                            rounded-full text-xs">
+                    Undergraduate
+                </span>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-5">
+                    BCA
+                </h3>
+
+                <p class="text-gray-500 text-sm mt-2">
+                    Bachelor of Computer Applications
+                </p>
+
+                <h2 class="text-3xl font-bold text-blue-600 mt-5">
+                    ₹35,000
+                </h2>
+
+                <p class="text-gray-500 text-sm">
+                    Per Year (Sample)
+                </p>
+
+                <hr class="my-5">
+
+                <p class="text-gray-600 text-sm">
+                    Duration: 3 Years
+                </p>
+
+                <button onclick="alert('BCA Course Details')"
+                    class="w-full bg-blue-600 text-white py-2
+                        rounded-lg mt-5 hover:bg-blue-700">
+                    View Details
+                </button>
+
+            </div>
+
+
+            <!-- B.Com Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg
+                        border border-black-100 transition duration-300 ease-in-out
+                        hover:-translate-y-1 hover:shadow-2xl  w-100 h-100">
+
+                <span class="bg-green-100 text-green-700 px-3 py-1
+                            rounded-full text-xs">
+                    Undergraduate
+                </span>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-5">
+                    B.Com
+                </h3>
+
+                <p class="text-gray-500 text-sm mt-2">
+                    Bachelor of Commerce
+                </p>
+
+                <h2 class="text-3xl font-bold text-green-600 mt-5">
+                    ₹30,000
+                </h2>
+
+                <p class="text-gray-500 text-sm">
+                    Per Year (Sample)
+                </p>
+
+                <hr class="my-5">
+
+                <p class="text-gray-600 text-sm">
+                    Duration: 3 Years
+                </p>
+
+                <button onclick="alert('B.Com Course Details')"
+                    class="w-full bg-green-600 text-white py-2
+                        rounded-lg mt-5 hover:bg-green-700">
+                    View Details
+                </button>
+
+            </div>
+
+
+            <!-- BA English Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg
+                        border border-black-100 transition duration-300 ease-in-out
+                        hover:-translate-y-1 hover:shadow-2xl  w-100 h-100">
+
+                <span class="bg-purple-100 text-purple-700 px-3 py-1
+                            rounded-full text-xs">
+                    Undergraduate
+                </span>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-5">
+                    BA English
+                </h3>
+
+                <p class="text-gray-500 text-sm mt-2">
+                    Bachelor of Arts in English
+                </p>
+
+                <h2 class="text-3xl font-bold text-purple-600 mt-5">
+                    ₹25,000
+                </h2>
+
+                <p class="text-gray-500 text-sm">
+                    Per Year (Sample)
+                </p>
+
+                <hr class="my-5">
+
+                <p class="text-gray-600 text-sm">
+                    Duration: 3 Years
+                </p>
+
+                <button onclick="alert('BA English Course Details')"
+                    class="w-full bg-purple-600 text-white py-2
+                        rounded-lg mt-5 hover:bg-purple-700">
+                    View Details
+                </button>
+
+            </div>
+
+
+            <!-- MSc Computer Science Card -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg
+                        border border-black-100 transition duration-300 ease-in-out
+                        hover:-translate-y-1 hover:shadow-2xl  w-100 h-100">
+
+                <span class="bg-orange-100 text-orange-700 px-3 py-1
+                            rounded-full text-xs">
+                    Postgraduate
+                </span>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-5">
+                    MSc CS
+                </h3>
+
+                <p class="text-gray-500 text-sm mt-2">
+                    Master of Computer Science
+                </p>
+
+                <h2 class="text-3xl font-bold text-orange-600 mt-5">
+                    ₹45,000
+                </h2>
+
+                <p class="text-gray-500 text-sm">
+                    Per Year (Sample)
+                </p>
+
+                <hr class="my-5">
+
+                <p class="text-gray-600 text-sm">
+                    Duration: 2 Years
+                </p>
+
+                <button onclick="alert('MSc CS Course Details')"
+                    class="w-full bg-orange-600 text-white py-2
+                        rounded-lg mt-5 hover:bg-orange-700">
+                    View Details
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!--Registerd Users Section-->
+            
+
+        <div id="registeredUsers"
+            class="bg-white mt-20 mb-20 p-6 md:p-8 rounded-2xl shadow-lg">
+
+            <!-- Heading -->
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
+
+                <h2 class="text-2xl font-bold text-gray-800">
+                    Registered Users
+                </h2>
+
+                <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
+                    Total Users
+                </span>
+
+            </div>
+
+            <!-- Search Box -->
+            <div class="mb-5">
+
+                <input type="text"
+                    id="searchUser"
+                    placeholder="Search by name or email..."
+                    class="w-full md:w-80 border border-gray-300 rounded-lg
+                            px-4 py-3 outline-none focus:ring-2
+                            focus:ring-blue-500">
+
+            </div>
+
+
+            
+                <!-- Responsive Table -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-lg">
+                
+                        <table class="w-full text-left text-medium text-black-700">
+
+                            <thead class="bg-blue-600 text-white">
+
+                                <tr>
+
+                                    <th class="px-6 py-4 text-medium font-semibold">ID</th>
+
+                                    <th class="px-6 py-4 text-medium font-semibold">Name</th>
+
+                                    <th class="px-6 py-4 text-medium font-semibold">Email</th>
+
+                                    <th class="px-6 py-4 text-medium font-semibold">Role</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="userTable" class="divide-y divide-slate-200">
+
+                                <!-- JavaScript displays users here -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!--department section-->
+            <div id="departmentSection"
+                    class="bg-white mt-10 p-6 md:p-8 rounded-2xl shadow-lg">
+
+                    <div class="flex flex-wrap justify-between items-center  gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                                Department Management
+                        </h2>
+
+                        <button onclick="openDepartmentForm()"
+                                class="bg-blue-600  text-white  px-5 py-3 rounded-lg
+                                hover:bg-blue-700  transition">
+                            +Add Department
+                        </button>
+
+                    </div>
+
+                    <div class="mx-auto max-w-screen-3xl overflow-x-auto rounded-xl border border-slate-200 shadow-lg">
+                        <table class="w-full text-left text-base text-slate-700">
+                            <thead class="bg-blue-600 text-white">
+                                <tr>
+                                    <th class="px-5 py-4 font-semibold">ID</th>
+                                    <th class="px-5 py-4 font-semibold">Department Name</th>
+                                    <th class="px-5 py-4 font-semibold">Head of Department</th>
+                                    <th class="px-5 py-4 font-semibold">Actions</th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody id="departmentTable"
+                                    class="divide-y divide-slate-200">
+
+                                    <!--Department display here-->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+            </div>
+
+            <!--Add department/edit department-->
+            
+<!-- Add / Edit Department Modal -->
+
+        <div id="departmentModal"
+            class="hidden fixed inset-0 bg-black/50
+                    items-center justify-center p-4 z-50">
+
+            <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl">
+
+                <!-- Heading -->
+                <h2 id="modalTitle"
+                    class="text-2xl font-bold text-gray-800 mb-6">
+                    Add Department
+                </h2>
+
+                <form id="departmentForm">
+
+                    <input type="hidden" id="departmentId">
+
+                    <!-- Department Name -->
+                    <div class="mb-5">
+
+                        <label class="block text-gray-700 font-medium mb-2">
+                            Department Name
+                        </label>
+
+                        <input type="text"
+                            id="departmentName"
+                            placeholder="Enter department name"
+                            required
+                            class="w-full border border-gray-300 rounded-lg
+                                    px-4 py-3 outline-none
+                                    focus:ring-2 focus:ring-blue-500">
+
+                    </div>
+
+                    <!-- HOD Name -->
+                    <div class="mb-6">
+
+                        <label class="block text-gray-700 font-medium mb-2">
+                            Head of Department
+                        </label>
+
+                        <input type="text"
+                            id="hodName"
+                            placeholder="Enter HOD name"
+                            required
+                            class="w-full border border-gray-300 rounded-lg
+                                    px-4 py-3 outline-none
+                                    focus:ring-2 focus:ring-blue-500">
+
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="grid grid-cols-2 gap-4">
+
+                        <button type="submit"
+                            class="w-full bg-blue-600 text-white
+                                px-4 py-3 rounded-lg font-semibold
+                                hover:bg-blue-700 transition cursor-pointer">
+                            Save Department
+                        </button>
+
+                        <button type="button"
+                            onclick="closeDepartmentForm()"
+                            class="w-full bg-gray-500 text-white
+                                px-4 py-3 rounded-lg font-semibold
+                                hover:bg-gray-600 transition cursor-pointer">
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+
+        <script>
+
+            function toggleNavMenu() {
+                const menu = document.getElementById("nav-menu");
+                const toggle = document.getElementById("nav-menu-toggle");
+                const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+
+                menu.classList.toggle("hidden");
+                menu.classList.toggle("flex");
+                toggle.setAttribute("aria-expanded", String(!isExpanded));
+                toggle.setAttribute("aria-label", isExpanded ? "Open navigation menu" : "Close navigation menu");
+                document.getElementById("menu-open-icon").classList.toggle("hidden");
+                document.getElementById("menu-close-icon").classList.toggle("hidden");
+            }
+
+            function displayUsers(searchText= "") {
+                    //get registered users
+                    let users= JSON.parse(localStorage.getItem("users")) || [];
+                    //get table
+                    let table=document.getElementById("userTable");
+
+                    table.innerHTML="";
+
+                    //search users
+                    let filteredUsers=users.filter(user=>
+                            user.name.toLowerCase().includes(searchText.toLowerCase()) ||
+                            user.email.toLowerCase().includes(searchText.toLowerCase())
+                    );
+
+                    //Diplay registerd users
+                    if(filteredUsers.length === 0) {
+                        table.innerHTML=    `
+                                        <tr>
+                                            <td colspan="4" class="p-6 text-center text-slate-500">
+                                                No registered users found
+                                            </td>
+                                        </tr>
+                                    `;
+                    }else {
+                        filteredUsers.forEach(function(user){
+                            let roleColor="";
+
+                            if(user.role.toLowerCase() === "admin"){
+                                roleColor="bg-purple-100 text-purple-700";
+                            }else if(user.role.toLowerCase()=== "teacher"){
+                                roleColor="bg-green-100 text-green-700";
+                            }
+                            else{
+                                roleColor="bg-blue-100  text-blue-700";
+                            }
+                    
+                       
+                            let row= ` <tr class="transition-colors hover:bg-blue-50">
+                                        <td class="px-6 py-4">${user.id}</td>
+                                        <td class ="px-6 py-4 font-medium text-slate-900">${user.name}</td>
+                                        <td class= "px-6 py-4">${user.email}</td>
+                                        <td class="px-6 py-4">
+                                            <span class="${roleColor} rounded-full px-3 py-1 text-xs font-semibold">${user.role}</span>
+                                        </td>
+                                    </tr>  `;
+                            
+                            table.innerHTML +=row;
+                    });
+                }
+            
+
+                    //calculate role count
+                    let students=users.filter(user => user.role.toLowerCase() === "student").length;
+                    let teachers=users.filter(user => user.role.toLowerCase() === "teacher").length;
+                    let admins=users.filter(user => user.role.toLowerCase() === "admin").length;
+
+
+
+                    //update dashborad count
+
+                    document.getElementById("studentCount").innerText=students;
+                           
+                    document.getElementById("teacherCount").innerText=teachers;
+
+                    document.getElementById("adminCount").innerText= admins;
+
+                    document.getElementById("totalUsers").innerText= users.length;
+
+
+            }
+
+            //load users when page opens
+            displayUsers();
+
+            //search functionality
+
+            document.getElementById("searchUser").addEventListener("input", function(){
+                displayUsers(this.value);
+            });
+
+            function logout() {
+
+            localStorage.removeItem("loggedUser");
+
+            alert("Logged out successfully!");
+
+            window.location.href = "login.html";
+
+        }
+
+
+        //get department from local storage
+        function getDepartments(){
+            return JSON.parse(localStorage.getItem("departments")) || [];
+        }
+
+        function saveDepartments(departments) {
+            localStorage.setItem("departments", JSON.stringify(departments));
+        }
+
+        function displayDepartments() {
+            let departments=getDepartments();
+            let table=document.getElementById("departmentTable");
+
+            table.innerHTML="";
+
+            if(departments.length === 0) {
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center p-6 text-gray-500">
+                            No departments found
+                        </td>
+                    </tr>
+                `;
+
+        return;
+            }
+
+            departments.forEach(function(department){
+                let row=document.createElement("tr");
+                row.className="transition-colors hover:bg-blue-50";
+
+                //create cells safely
+                let idCell = document.createElement("td");
+                idCell.className = "px-5 py-4 text-base";
+                idCell.textContent = department.id;
+
+                let nameCell = document.createElement("td");
+                nameCell.className = "px-5 py-4 font-medium text-gray-800";
+                nameCell.textContent = department.name;
+
+                let hodCell = document.createElement("td");
+                hodCell.className = "px-5 py-4 font-medium text-gray-800";
+                hodCell.textContent = department.hod;
+
+                let actionCell = document.createElement("td");
+                actionCell.className = "px-5 py-4";
+
+                actionCell.innerHTML= `
+                    <div class="flex gap-2">
+
+                        <button
+                            class="bg-green-700 text-white px-3 py-2 rounded-lg
+                                hover:bg-green-600"
+                            onclick="editDepartment(${department.id})">
+                            Edit
+                        </button>
+
+                        <button
+                            class="bg-red-700 text-white px-3 py-2 rounded-lg
+                                hover:bg-red-600"
+                            onclick="deleteDepartment(${department.id})">
+                            Delete
+                        </button>
+
+                    </div>
+                `;
+
+                row.append(idCell,nameCell,hodCell,actionCell);
+                table.appendChild(row);
+
+            });
+        }
+
+        //open and department form
+        function openDepartmentForm() {
+
+            document.getElementById("departmentForm").reset();
+
+            document.getElementById("departmentId").value = "";
+
+            document.getElementById("modalTitle").innerText = "Add Department";
+
+            document.getElementById("departmentModal").classList.remove("hidden");
+
+            let modal=document.getElementById("departmentModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+        }
+
+        //close department form
+        function closeDepartmentForm() {
+
+            let modal=document.getElementById("departmentModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+
+            document.getElementById("departmentModal").classList.add("hidden");
+        }
+
+        // Add or Update Department
+        document.getElementById("departmentForm").addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            let id = document.getElementById("departmentId").value;
+
+            let name = document.getElementById("departmentName").value.trim();
+
+            let hod = document.getElementById("hodName").value.trim();
+
+            if(name === "" || hod === ""){
+                alert("please fill in all Field");
+                return;
+            }
+
+            let departments = JSON.parse(localStorage.getItem("departments")) || [];
+
+
+            
+
+            // Check duplicate department name
+            let duplicate = departments.some(department =>
+                department.name.toLowerCase() === name.toLowerCase() &&
+                String(department.id) !== id
+            );
+
+            if (duplicate) {
+
+                alert("This department already exists!");
+
+                return;
+            }
+
+            if (id !== "") {
+
+                // Edit existing department
+                departments = departments.map(department => {
+
+                    if (String(department.id) === id) {
+
+                        return {
+                            ...department,
+                            name: name,
+                            hod: hod
+                        };
+
+                    }
+
+                    return department;
+
+                });
+
+                alert("Department updated successfully!");
+
+            } else {
+
+                // Add new department
+                let newDepartment = {
+
+                    id: departments.length > 0
+                        ? Math.max(...departments.map(department => Number(department.id))) + 1
+                        : 1,
+
+                    name: name,
+                    hod: hod
+
+                };
+
+                departments.push(newDepartment);
+
+                alert("Department added successfully!");
+
+            }
+
+            // Save and refresh
+            localStorage.setItem("departments", JSON.stringify(departments));
+
+            displayDepartments();
+
+            closeDepartmentForm();
+
+            document.getElementById("departmentForm").reset();
+
+
+            });
+
+    // Edit Department
+        function editDepartment(id) {
+
+            let departments = getDepartments();
+
+            let department = departments.find(department => String(department.id) === String(id));
+
+            if (!department) return;
+
+            document.getElementById("departmentId").value = department.id;
+
+            document.getElementById("departmentName").value = department.name;
+
+            document.getElementById("hodName").value = department.hod;
+
+            document.getElementById("modalTitle").innerText = "Edit Department";
+
+            let modal = document.getElementById("departmentModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+        }
+
+
+
+        // Delete Department
+            function deleteDepartment(id) {
+
+                if (!confirm("Are you sure you want to delete this department?")) {
+                    return;
+                }
+
+                let departments = getDepartments();
+
+                departments = departments.filter(department => String(department.id) !== String(id));
+
+                saveDepartments(departments);
+
+                displayDepartments();
+
+                alert("Department deleted successfully!");
+
+            }
+
+
+            // Display departments when page loads
+            displayDepartments();
+
+        </script>
+    </body>
+</html>
