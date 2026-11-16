@@ -19,7 +19,7 @@ class BookInventory
             echo "3. Show all currently borrowed books\n";
             echo "4. Show all members who have taken a particular book\n";
             echo "5. Show all fines associated with a book\n";
-            echo "6. Show all lost books\n";
+            echo "6. Show all lost and Overdue books\n";
             echo "0. Back to main menu\n";
 
             $choice = trim(readline("Enter your choice: "));
@@ -490,6 +490,7 @@ class BookInventory
         $finesForBookError = '';
         $lostBooksForTable = null;
         $lostBooksTableError = '';
+        $showOverdueBooksTable = false;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = $_POST['inventory_action'] ?? '';
@@ -562,6 +563,8 @@ class BookInventory
                 } catch (PDOException $e) {
                     $lostBooksTableError = 'Error showing lost books: ' . $e->getMessage();
                 }
+            } elseif ($action === 'overdue') {
+                $showOverdueBooksTable = true;
             } else {
                 ob_start();
 
@@ -579,6 +582,35 @@ class BookInventory
         )->fetchAll(PDO::FETCH_ASSOC);
 
         echo '<h2>Book Inventory Management</h2>';
+        echo '<style>
+            .inventory-overdue {
+                margin: 20px 0;
+                padding: 20px;
+            }
+            .inventory-overdue h3 {
+                margin: 0 0 14px;
+            }
+            .inventory-overdue form {
+                margin: 0;
+            }
+            .inventory-overdue-table-wrap {
+                overflow-x: auto;
+            }
+            .inventory-overdue table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .inventory-overdue th,
+            .inventory-overdue td {
+                padding: 10px 12px;
+                border: 1px solid;
+                text-align: left;
+                white-space: nowrap;
+            }
+            .inventory-overdue-empty {
+                margin: 0;
+            }
+        </style>';
 
         echo '<h3>1. Show all books with inventory date</h3>';
         echo '<form method="post">';
@@ -612,6 +644,14 @@ class BookInventory
         echo '<input type="hidden" name="inventory_action" value="lost_books">';
         echo '<button type="submit">Show Lost Books</button>';
         echo '</form>';
+
+        echo '<section class="inventory-overdue">';
+        echo '<h3>8. Show all overdue books</h3>';
+        echo '<form method="post">';
+        echo '<input type="hidden" name="inventory_action" value="overdue">';
+        echo '<button type="submit">Show All Overdue Books</button>';
+        echo '</form>';
+        echo '</section>';
 
         if ($availableBooksTable !== null) {
             echo '<hr><h3>Available Books</h3>';
@@ -647,10 +687,10 @@ class BookInventory
                 echo '</table>';
             }
         } elseif ($availableBooksTableError !== '') {
-            echo '<hr><h3>Inventory Results</h3>';
+            //echo '<hr><h3>Inventory Results</h3>';
             echo '<p>' . htmlspecialchars($availableBooksTableError, ENT_QUOTES, 'UTF-8') . '</p>';
         } elseif ($borrowingsForTable !== null) {
-            echo '<hr><h3>Inventory Results</h3>';
+            //echo '<hr><h3>Inventory Results</h3>';
             if (!$borrowingsForTable) {
                 echo '<p>No books are currently borrowed.</p>';
             } else {
@@ -802,6 +842,9 @@ class BookInventory
         } elseif ($lostBooksTableError !== '') {
             echo '<hr><h3>Inventory Results</h3>';
             echo '<p>' . htmlspecialchars($lostBooksTableError, ENT_QUOTES, 'UTF-8') . '</p>';
+        } elseif ($showOverdueBooksTable) {
+            echo '<hr><h3>Inventory Results</h3>';
+            $this->showOverdueBooks();
         } elseif ($showAllBooksTable) {
             echo '<hr><h3>Inventory Results</h3>';
             try {
@@ -839,6 +882,8 @@ class BookInventory
             echo '<hr><h3>Inventory Results</h3>';
             echo '<pre>' . htmlspecialchars($result, ENT_QUOTES, 'UTF-8') . '</pre>';
         }
+
+
     }
 
     private function renderBookSelectForm(string $action, array $books): void
@@ -889,4 +934,76 @@ class BookInventory
 
         return $bookId;
     }
+            // Show all overdue books
+        public function showOverdueBooks(): void
+        {
+            try {
+                $sql = "SELECT
+                            br.borrowing_id,
+                            b.book_id,
+                            b.title AS book_title,
+                            m.member_id,
+                            m.name AS member_name,
+                            br.borrow_date,
+                            br.due_date,
+                            DATEDIFF(CURDATE(), br.due_date) AS overdue_days
+                        FROM borrowings br
+                        INNER JOIN books b
+                            ON br.book_id = b.book_id
+                        INNER JOIN members m
+                            ON br.member_id = m.member_id
+                        WHERE br.return_date IS NULL
+                        AND br.due_date < CURDATE()
+                        ORDER BY br.due_date ASC";
+
+                $stmt = $this->conn->query($sql);
+                $overdueBooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                echo '<section class="inventory-overdue">';
+                echo '<h3>Overdue Books</h3>';
+
+                if (!$overdueBooks) {
+                    echo '<p class="inventory-overdue-empty">No overdue books found.</p>';
+                    echo '</section>';
+                    return;
+                }
+
+                echo '<div class="inventory-overdue-table-wrap">';
+                echo '<table class="inventory-overdue">';
+                echo '<thead><tr>
+                        <th>Borrowing ID</th>
+                        <th>Book ID</th>
+                        <th>Book Title</th>
+                        <th>Member ID</th>
+                        <th>Member Name</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                        <th>Overdue Days</th>
+                    </tr></thead><tbody>';
+
+                foreach ($overdueBooks as $row) {
+                    echo '<tr>';
+                    echo '<td>' . htmlspecialchars($row['borrowing_id']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['book_id']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['book_title']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['member_id']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['member_name']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['borrow_date']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['due_date']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['overdue_days']) . '</td>';
+                    echo '</tr>';
+                }
+
+                echo '</tbody></table>';
+                echo '</div>';
+                echo '</section>';
+
+            } catch (PDOException $e) {
+                echo '<section class="inventory-overdue">';
+                echo '<p class="inventory-overdue-empty">Error showing overdue books: '
+                    . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8')
+                    . '</p></section>';
+            }
+        }
+
 }
