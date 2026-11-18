@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'renew
 }
 
 $activeBorrowings = $conn->query("SELECT br.borrowing_id, br.member_id, m.name AS member_name,
-                                         b.title AS book_title, br.copy_id,
+                                         b.title AS book_title, br.book_id,
                                          br.borrow_date, br.due_date,
                                          (SELECT COUNT(*) FROM renewal_history rh
                                           WHERE rh.borrowing_id = br.borrowing_id) AS renewals_used
@@ -179,7 +179,7 @@ $renewalHistory = $conn->query("SELECT rh.renewal_id, rh.borrowing_id, m.name AS
                     <option value="<?= h($item['borrowing_id']) ?>"
                         <?= ($isOverdue || $atLimit) ? 'disabled' : '' ?>>
                         <?= h('#' . $item['borrowing_id'] . ' - ' . $item['member_name'] .
-                            ' - ' . $item['book_title'] . ' - Copy ' . $item['copy_id'] .
+                            ' - ' . $item['book_title'] . ' - Book ID ' . $item['book_id'] .
                             ' - Due: ' . $item['due_date'] .
                             ' - Renewals: ' . $item['renewals_used'] . '/' . $maxRenewals .
                             ($isOverdue ? ' (Overdue)' : '') .
@@ -197,7 +197,7 @@ $renewalHistory = $conn->query("SELECT rh.renewal_id, rh.borrowing_id, m.name AS
     <?php else: ?>
         <table border="1" cellpadding="7" cellspacing="0">
             <tr>
-                <th>Borrowing ID</th><th>Member</th><th>Book</th><th>Copy ID</th>
+                <th>Borrowing ID</th><th>Member</th><th>Book</th><th>Book ID</th>
                 <th>Borrow Date</th><th>Current Due Date</th><th>Renewals Used</th><th>Status</th>
             </tr>
             <?php foreach ($activeBorrowings as $item): ?>
@@ -205,7 +205,7 @@ $renewalHistory = $conn->query("SELECT rh.renewal_id, rh.borrowing_id, m.name AS
                     <td><?= h($item['borrowing_id']) ?></td>
                     <td><?= h($item['member_name']) ?></td>
                     <td><?= h($item['book_title']) ?></td>
-                    <td><?= h($item['copy_id']) ?></td>
+                    <td><?= h($item['book_id']) ?></td>
                     <td><?= h($item['borrow_date']) ?></td>
                     <td><?= h($item['due_date']) ?></td>
                     <td><?= h($item['renewals_used']) ?> / <?= $maxRenewals ?></td>

@@ -283,6 +283,7 @@ class Member
                     echo '<tr><th>' . self::h($label) . '</th><td>' . self::h($value) . '</td></tr>';
                 }
                 echo '</table>';
+                $this->renderMemberBorrowings($id);
                 echo '<p><a href="index.php?page=members&action=edit&id=' .
                     self::h($id) . '">Edit Member</a> | ';
                 echo '<a href="index.php?page=members">Back to Members</a></p>';
@@ -362,6 +363,44 @@ class Member
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $row ?: null;
+    }
+
+    private function renderMemberBorrowings(int $memberId): void
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT br.book_id, b.title, br.borrow_date, br.due_date, br.return_date,
+                    GREATEST(
+                        DATEDIFF(COALESCE(br.return_date, CURDATE()), br.borrow_date),
+                        0
+                    ) AS days_held
+             FROM borrowings br
+             JOIN books b ON b.book_id = br.book_id
+             WHERE br.member_id = ?
+             ORDER BY br.borrow_date DESC, br.borrowing_id DESC'
+        );
+        $stmt->execute([$memberId]);
+        $borrowings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo '<h3>Book Borrowing History</h3>';
+        if (!$borrowings) {
+            echo '<p>No borrowing records found for this member.</p>';
+            return;
+        }
+
+        echo '<table border="1" cellpadding="6">';
+        echo '<tr><th>Book ID</th><th>Book</th><th>Borrow Date</th><th>Due Date</th>';
+        echo '<th>Return Date</th><th>Days Held</th></tr>';
+        foreach ($borrowings as $borrowing) {
+            echo '<tr>';
+            echo '<td>' . self::h($borrowing['book_id']) . '</td>';
+            echo '<td>' . self::h($borrowing['title']) . '</td>';
+            echo '<td>' . self::h($borrowing['borrow_date']) . '</td>';
+            echo '<td>' . self::h($borrowing['due_date']) . '</td>';
+            echo '<td>' . self::h($borrowing['return_date'] ?? 'Not returned') . '</td>';
+            echo '<td>' . self::h($borrowing['days_held']) . '</td>';
+            echo '</tr>';
+        }
+        echo '</table>';
     }
 
     private function renderMemberTable(array $members): void
