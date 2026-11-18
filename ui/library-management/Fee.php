@@ -259,6 +259,7 @@ class Fee
         $sql = "SELECT
                     f.fee_id,
                     f.borrowing_id,
+                    br.book_id,
                     m.member_id,
                     m.name AS member_name,
                     b.title AS book_title,
@@ -310,6 +311,7 @@ class Fee
         $sql = "SELECT
                     f.fee_id,
                     f.borrowing_id,
+                    br.book_id,
                     m.member_id,
                     b.title AS book_title,
                     m.name AS member_name,
@@ -328,6 +330,28 @@ class Fee
         return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    private function getPendingFeeRecords(): array
+    {
+        $sql = "SELECT
+                    f.fee_id,
+                    f.borrowing_id,
+                    br.book_id,
+                    br.borrow_date,
+                    m.name AS member_name,
+                    b.title AS book_title,
+                    f.fee_type,
+                    f.amount,
+                    f.fee_date
+                FROM fees f
+                INNER JOIN borrowings br ON f.borrowing_id = br.borrowing_id
+                INNER JOIN members m ON br.member_id = m.member_id
+                INNER JOIN books b ON br.book_id = b.book_id
+                WHERE f.payment_status = 'pending'
+                ORDER BY f.fee_date, f.fee_id";
+
+        return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     private function renderFeeRecordsTable(array $fees, bool $history = false): void
     {
         if ($fees === []) {
@@ -338,6 +362,7 @@ class Fee
         $columns = $history ? [
             'fee_id' => 'Fee ID',
             'borrowing_id' => 'Borrowing ID',
+            'book_id' => 'Book ID',
             'member_id' => 'Member ID',
             'book_title' => 'Book',
             'member_name' => 'Member',
@@ -350,6 +375,7 @@ class Fee
         ] : [
             'fee_id' => 'Fee ID',
             'borrowing_id' => 'Borrowing ID',
+            'book_id' => 'Book ID',
             'member_id' => 'Member ID',
             'member_name' => 'Member',
             'book_title' => 'Book',
@@ -377,6 +403,7 @@ class Fee
                 $values = [
                     'fee_id' => $fee['fee_id'],
                     'borrowing_id' => $fee['borrowing_id'],
+                    'book_id' => $fee['book_id'],
                     'member_id' => $fee['member_id'],
                     'book_title' => $fee['book_title'],
                     'member_name' => $fee['member_name'],
@@ -405,6 +432,7 @@ class Fee
             $values = [
                 'fee_id' => $fee['fee_id'],
                 'borrowing_id' => $fee['borrowing_id'],
+                'book_id' => $fee['book_id'],
                 'member_id' => $fee['member_id'],
                 'member_name' => $fee['member_name'],
                 'book_title' => $fee['book_title'],
@@ -432,6 +460,44 @@ class Fee
             foreach (array_keys($columns) as $key) {
                 echo '<td>' . $this->h($values[$key]) . '</td>';
             }
+            echo '</tr>';
+        }
+
+        echo '</tbody></table></div>';
+    }
+
+    private function renderPendingFeeTable(array $fees): void
+    {
+        if ($fees === []) {
+            echo '<p>No unpaid fees.</p>';
+            return;
+        }
+
+        echo '<div style="overflow-x:auto"><table border="1" cellpadding="6" cellspacing="0">';
+        echo '<thead><tr><th>Fee ID</th><th>Borrowing ID</th><th>Member</th>'
+            . '<th>Book</th><th>Book ID</th><th>Borrowed On</th><th>Fee Type</th>'
+            . '<th>Amount</th><th>Fee Date</th><th>Action</th></tr></thead><tbody>';
+
+        foreach ($fees as $fee) {
+            echo '<tr>';
+            foreach ([
+                'fee_id',
+                'borrowing_id',
+                'member_name',
+                'book_title',
+                'book_id',
+                'borrow_date',
+                'fee_type',
+            ] as $key) {
+                echo '<td>' . $this->h($fee[$key]) . '</td>';
+            }
+            echo '<td>Rs. ' . number_format((float) $fee['amount'], 2) . '</td>';
+            echo '<td>' . $this->h($fee['fee_date']) . '</td>';
+            echo '<td><form method="post" style="margin:0">';
+            echo '<input type="hidden" name="fee_action" value="paid">';
+            echo '<input type="hidden" name="fee_id" value="'
+                . $this->h($fee['fee_id']) . '">';
+            echo '<button type="submit">Mark as Paid</button></form></td>';
             echo '</tr>';
         }
 
@@ -650,6 +716,7 @@ class Fee
         $sql = "SELECT
                     f.fee_id,
                     f.borrowing_id,
+                    br.book_id,
                     m.member_id,
                     b.title AS book_title,
                     m.name AS member_name,
@@ -688,6 +755,7 @@ class Fee
 
             echo "\nFee ID: " . $fee['fee_id'] . "\n";
             echo "Borrowing ID: " . $fee['borrowing_id'] . "\n";
+            echo "Book ID: " . $fee['book_id'] . "\n";
             echo "Member ID: " . $fee['member_id'] . "\n";
             echo "Book: " . $fee['book_title'] . "\n";
             echo "Member: " . $fee['member_name'] . "\n";
@@ -903,7 +971,7 @@ class Fee
 
     private function getActiveBorrowings(): array
     {
-        $sql = "SELECT br.borrowing_id, m.name AS member_name,
+        $sql = "SELECT br.borrowing_id, br.book_id, m.name AS member_name,
                        b.title AS book_title
                 FROM borrowings br
                 JOIN members m ON m.member_id = br.member_id
@@ -980,6 +1048,12 @@ class Fee
             $borrowings = [];
             $error = $error !== '' ? $error : $e->getMessage();
         }
+        try {
+            $pendingFees = $this->getPendingFeeRecords();
+        } catch (Throwable $e) {
+            $pendingFees = [];
+            $error = $error !== '' ? $error : $e->getMessage();
+        }
 
         echo '<h2>Fee Management</h2>';
         if ($error !== '') {
@@ -1015,18 +1089,17 @@ class Fee
         echo '<option value="">Select a borrowed book</option>';
         foreach ($borrowings as $borrowing) {
             $label = '#' . $borrowing['borrowing_id'] . ' - '
-                . $borrowing['member_name'] . ' - ' . $borrowing['book_title'];
+                . $borrowing['member_name'] . ' - ' . $borrowing['book_title']
+                . ' (Book ID: ' . $borrowing['book_id'] . ')';
             echo '<option value="' . $this->h($borrowing['borrowing_id']) . '">'
                 . $this->h($label) . '</option>';
         }
         echo '</select></label> <button type="submit">Add Lost-Book Fee</button>';
         echo '</form></section>';
 
-        echo '<section><h3>Mark a Fee as Paid</h3>';
-        echo '<form method="post">';
-        echo '<input type="hidden" name="fee_action" value="paid">';
-        echo '<label>Fee ID: <input type="number" name="fee_id" min="1" required></label> ';
-        echo '<button type="submit">Mark as Paid</button></form></section>';
+        echo '<section><h3>Unpaid Fees</h3>';
+        $this->renderPendingFeeTable($pendingFees);
+        echo '</section>';
 
         echo '<section><h3>Fee Records and Reports</h3>';
         echo '<form method="post">';
