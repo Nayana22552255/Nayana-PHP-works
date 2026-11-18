@@ -62,6 +62,21 @@ class Author
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getBooksByAuthor(int $authorId): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT b.book_id, b.title, b.isbn, b.publication_year,
+                    b.physical_format, bc.copy_id, bc.status
+             FROM book_authors ba
+             INNER JOIN books b ON b.book_id = ba.book_id
+             LEFT JOIN book_copies bc ON bc.book_id = b.book_id
+             WHERE ba.author_id = ?
+             ORDER BY b.title, b.book_id, bc.copy_id"
+        );
+        $stmt->execute([$authorId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // UPDATE AUTHOR
     public function update(
         int $id,
