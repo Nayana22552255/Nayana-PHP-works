@@ -1003,7 +1003,15 @@ public function showMemberBorrowingHistory(int $memberId):void
     private function bookOptions(): array
     {
         return $this->conn->query(
-            "SELECT book_id, title FROM books ORDER BY title"
+            "SELECT b.book_id, b.title,
+                    COUNT(bc.copy_id) AS total_copies,
+                    COALESCE(SUM(CASE WHEN bc.status = 'Available' THEN 1 ELSE 0 END), 0) AS available_copies,
+                    COALESCE(SUM(CASE WHEN bc.status = 'Borrowed' THEN 1 ELSE 0 END), 0) AS borrowed_copies,
+                    COALESCE(SUM(CASE WHEN bc.status = 'Lost' THEN 1 ELSE 0 END), 0) AS lost_copies
+             FROM books b
+             LEFT JOIN book_copies bc ON bc.book_id = b.book_id
+             GROUP BY b.book_id, b.title
+             ORDER BY b.title, b.book_id"
         )->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -1023,7 +1031,7 @@ public function showMemberBorrowingHistory(int $memberId):void
     {
         $this->updateOverdueLateFees();
         $sql = "SELECT br.borrowing_id, br.member_id, m.name AS member_name,
-                       br.book_id, b.title AS book_title, br.copy_id,
+                       br.book_id, b.title AS book_title,
                        br.borrow_date, br.due_date, br.return_date,
                        br.late_fee, br.lost_fee
                 FROM borrowings br
@@ -1039,10 +1047,10 @@ public function showMemberBorrowingHistory(int $memberId):void
         }
 
         echo '<table border="1" cellpadding="6">';
-        echo '<tr><th>ID</th><th>Member</th><th>Book</th><th>Copy ID</th><th>Borrow Date</th><th>Due Date</th><th>Return Date</th><th>Late Fee</th><th>Lost Fee</th><th>Status</th></tr>';
+        echo '<tr><th>ID</th><th>Member</th><th>Book</th><th>Book ID</th><th>Borrow Date</th><th>Due Date</th><th>Return Date</th><th>Late Fee</th><th>Lost Fee</th><th>Status</th></tr>';
         foreach ($records as $r) {
             echo '<tr>';
-            foreach (['borrowing_id','member_name','book_title','copy_id','borrow_date','due_date','return_date','late_fee','lost_fee'] as $key) {
+            foreach (['borrowing_id','member_name','book_title','book_id','borrow_date','due_date','return_date','late_fee','lost_fee'] as $key) {
                 $value = $r[$key];
                 if ($key === 'return_date' && !$value) $value = 'Not returned';
                 echo '<td>' . $this->h($value === null ? '-' : $value) . '</td>';
@@ -1210,7 +1218,21 @@ public function showMemberBorrowingHistory(int $memberId):void
         echo '</select></label> ';
         echo '<label>Book: <select name="book_id" required><option value="">Select Book</option>';
         foreach ($this->bookOptions() as $b) {
-            echo '<option value="' . $this->h($b['book_id']) . '">' . $this->h($b['title']) . ' (ID: ' . $this->h($b['book_id']) . ')</option>';
+            $availableCopies = (int) $b['available_copies'];
+            $totalCopies = (int) $b['total_copies'];
+            if ($availableCopies > 0) {
+                $availability = 'Available (' . $availableCopies . ' of ' . $totalCopies . ')';
+            } elseif ((int) $b['borrowed_copies'] > 0) {
+                $availability = 'Borrowed';
+            } elseif ((int) $b['lost_copies'] > 0) {
+                $availability = 'Lost';
+            } else {
+                $availability = 'No copies';
+            }
+            echo '<option value="' . $this->h($b['book_id']) . '"' .
+                ($availableCopies > 0 ? '' : ' disabled') . '>' .
+                $this->h($b['title']) . ' (ID: ' . $this->h($b['book_id']) .
+                ') - ' . $this->h($availability) . '</option>';
         }
         echo '</select></label> ';
         echo '<button type="submit">Borrow Book</button></form>';
