@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html class="overscroll-none">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+     <script src="script.js" defer></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head> 
+ 
+ <body>
+ <!--registered users section-->
+                <section id="registeredUsers"
+                         class="bg-white p-6 rounded-2xl sahdow-lg mt-15 scroll-mt-24">
+
+                        <div class="mx-auto flex w-full flex-wrap justify-between items-center gap-4 mb-15 md:w-[95%]">
+
+                            <div>
+                                <h2 class="text-4xl font-bold text-slate-800">
+                                    Registered Users
+                                </h2>
+                                <p class="mt-3 text-xl text-slate-600">
+                                    See all registered users
+                                </p>
+                            </div>
+                            <span class="bg-blue-100  text-blue-700 px-4 py-2 rounded-full text-sm">
+                                    Total Users
+                            </span>
+
+                         </div>
+
+                         <!--search-->
+                         <input type="text"
+                                id="searchUser"
+                                placeholder="Search by name or email"
+                                class="mx-auto block w-full md:w-[95%] border border-slate-300 
+                                        rounded-lg px-4 py-3 mb-5
+                                        outline-none focus:ring-2
+                                        focus:ring-blue-500">
+
+                        <!--userTable-->
+                         <div class="mx-auto w-full md:w-[95%] overflow-x-auto rounded-lg border border-slate-300">
+
+                        <table class="w-full text-left">
+
+                            <thead class="bg-blue-600 text-white">
+                                <tr>
+                                    <th class="px-5 py-4">ID</th>
+                                    <th class="px-5 py-4">Name</th>
+                                    <th class="px-5 py-4">Email</th>
+                                    <th class="px-5 py-4">Role</th>
+                                    <th class="px-5 py-4">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="userTable"
+                                class="divide-y divide-slate-200">
+
+                                <!-- JavaScript displays users here -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+                <div id="userEditModal"
+                     class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="userEditTitle">
+                    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+                        <h2 id="userEditTitle" class="mb-6 text-2xl font-bold text-slate-800">
+                            Edit User
+                        </h2>
+
+                        <form id="userEditForm">
+                            <input type="hidden" id="userEditId">
+
+                            <div class="mb-4">
+                                <label for="userEditName" class="mb-2 block font-medium text-slate-700">Name</label>
+                                <input id="userEditName" type="text" required
+                                       class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="userEditEmail" class="mb-2 block font-medium text-slate-700">Email</label>
+                                <input id="userEditEmail" type="email" required
+                                       class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-6">
+                                <label for="userEditRole" class="mb-2 block font-medium text-slate-700">Role</label>
+                                <select id="userEditRole" required
+                                        class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="Teacher">Teacher</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Staff">Staff</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="submit"
+                                        class="rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700">
+                                    Save Changes
+                                </button>
+                                <button type="button" onclick="closeUserEdit()"
+                                        class="rounded-lg bg-gray-500 px-4 py-3 font-semibold text-white hover:bg-gray-600">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+</body>
+</html>           

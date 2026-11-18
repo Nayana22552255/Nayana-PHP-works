@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html class="overscroll-none">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Management</title>
+     <script src="script.js" defer></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+   <!--department Management-->
+                <section id="departmentSection"
+                            class="bg-white p-6 rounded-2xl shadow-lg mb-6 mt-10">
+
+                        <div class="mx-auto flex w-full flex-wrap justify-between items-center gap-4 mb-15 md:w-[90%]">
+
+                                <h2 class="text-4xl font-bold text-slate-800">
+                                    Department Management
+                                </h2>
+
+                                <button onclick="openDepartmentForm()"
+                                        class="bg-blue-600 text-white px-5 py-3
+                                            rounded-lg hover:bg-blue-700">
+                                    + Add Department
+                                </button>
+
+                        </div>
+
+                        <div class="mx-auto w-full md:w-[90%] overflow-x-auto rounded-lg border border-slate-300">
+
+                            <table class="w-full text-left">
+
+                                <thead class="bg-blue-600 text-white">
+                                    <tr>
+                                        <th class="px-5 py-4">ID</th>
+                                        <th class="px-5 py-4">Department Name</th>
+                                        <th class="px-5 py-4">Head of Department</th>
+                                        <th class="px-5 py-4">Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="departmentTable"
+                                    class="divide-y divide-slate-200">
+
+                                    <!-- JavaScript displays departments here -->
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                </section>
+
+                <div id="departmentModal"
+                     class="hidden fixed inset-0 z-50 items-center justify-center bg-black/50 p-4"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="modalTitle">
+
+                    <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+                        <h2 id="modalTitle" class="mb-6 text-2xl font-bold text-slate-800">
+                            Add Department
+                        </h2>
+
+                        <form id="departmentForm">
+                            <input type="hidden" id="departmentId">
+
+                            <div class="mb-5">
+                                <label for="departmentName" class="mb-2 block font-medium text-slate-700">
+                                    Department Name
+                                </label>
+                                <input type="text"
+                                       id="departmentName"
+                                       required
+                                       placeholder="Enter department name"
+                                       class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="mb-6">
+                                <label for="hodName" class="mb-2 block font-medium text-slate-700">
+                                    Head of Department
+                                </label>
+                                <input type="text"
+                                       id="hodName"
+                                       required
+                                       placeholder="Enter HOD name"
+                                       class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="submit"
+                                        class="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700">
+                                    Save Department
+                                </button>
+                                <button type="button"
+                                        onclick="closeDepartmentForm()"
+                                        class="w-full rounded-lg bg-gray-500 px-4 py-3 font-semibold text-white transition hover:bg-gray-600">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+    
+</body>
+</html>
