@@ -544,7 +544,7 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
         <p>No books found.</p>
     <?php else: ?>
         <table border="1" cellpadding="6" cellspacing="0">
-            <tr><th>ID</th><th>Title</th><th>Authors</th><th>Genre</th><th>Year</th><th>ISBN</th><th>Price</th><th>Total Copies</th><th>Available Copies</th><th>Actions</th></tr>
+            <tr><th>Book ID</th><th>Title</th><th>Authors</th><th>Genre</th><th>Year</th><th>ISBN</th><th>Price</th><th>Total Copies</th><th>Available Copies</th><th>Actions</th></tr>
             <?php foreach ($bookRows as $bookRow): ?>
                 <tr>
                     <td><?= e($bookRow['book_id']) ?></td><td><?= e($bookRow['title']) ?></td>
@@ -553,6 +553,12 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
                     <td><?= e($bookRow['total_copies']) ?></td><td><?= e($bookRow['available_copies']) ?></td>
                     <td>
                         <a href="?page=books&action=edit&id=<?= e($bookRow['book_id']) ?>">Edit</a>
+                        <form method="get" action="index.php" style="display:inline">
+                            <input type="hidden" name="page" value="books">
+                            <input type="hidden" name="action" value="copies">
+                            <input type="hidden" name="id" value="<?= e($bookRow['book_id']) ?>">
+                            <button type="submit">Show Copies</button>
+                        </form>
                         <form method="post" action="index.php?page=books" style="display:inline">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?= e($bookRow['book_id']) ?>">
@@ -562,6 +568,14 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
                 </tr>
             <?php endforeach; ?>
         </table>
+    <?php endif; ?>
+    <?php if ($action === 'copies'): ?>
+        <?php
+        $historyCopyId = isset($_GET['history_copy_id'])
+            ? (int)$_GET['history_copy_id']
+            : null;
+        (new Book($conn))->renderCopies((int)($_GET['id'] ?? 0), $historyCopyId);
+        ?>
     <?php endif; ?>
 
 <?php elseif ($page === 'authors'): ?>
@@ -583,10 +597,47 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
         <?php foreach ($authorRows as $authorRow): ?>
             <tr><td><?= e($authorRow['author_id']) ?></td><td><?= e($authorRow['author_name']) ?></td><td><?= e($authorRow['biography']) ?></td><td>
                 <a href="?page=authors&action=edit&id=<?= e($authorRow['author_id']) ?>">Edit</a>
+                <form method="get" action="index.php" style="display:inline">
+                    <input type="hidden" name="page" value="authors">
+                    <input type="hidden" name="action" value="books">
+                    <input type="hidden" name="id" value="<?= e($authorRow['author_id']) ?>">
+                    <button type="submit">View Books</button>
+                </form>
                 <form method="post" action="index.php?page=authors" style="display:inline"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= e($authorRow['author_id']) ?>"><button type="submit">Delete</button></form>
             </td></tr>
         <?php endforeach; ?>
         </table>
+    <?php endif; ?>
+    <?php if ($action === 'books'): ?>
+        <?php
+        $authorManager = new Author($conn);
+        $selectedAuthorId = (int)($_GET['id'] ?? 0);
+        $selectedAuthor = $authorManager->getAuthor($selectedAuthorId);
+        ?>
+        <?php if (!$selectedAuthor): ?>
+            <p>Author not found.</p>
+        <?php else: ?>
+            <h3>Books by <?= e($selectedAuthor['author_name']) ?></h3>
+            <?php $authorBooks = $authorManager->getBooksByAuthor($selectedAuthorId); ?>
+            <?php if (!$authorBooks): ?>
+                <p>No books found for this author.</p>
+            <?php else: ?>
+                <table border="1" cellpadding="6" cellspacing="0">
+                    <tr><th>Book ID</th><th>Title</th><th>ISBN</th><th>Year</th><th>Format</th><th>Copy ID</th><th>Status</th></tr>
+                    <?php foreach ($authorBooks as $authorBook): ?>
+                        <tr>
+                            <td><?= e($authorBook['book_id']) ?></td>
+                            <td><?= e($authorBook['title']) ?></td>
+                            <td><?= e($authorBook['isbn'] ?? 'N/A') ?></td>
+                            <td><?= e($authorBook['publication_year'] ?? 'N/A') ?></td>
+                            <td><?= e($authorBook['physical_format'] ?? 'N/A') ?></td>
+                            <td><?= e($authorBook['copy_id'] ?? 'N/A') ?></td>
+                            <td><?= e($authorBook['status'] ?? 'N/A') ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            <?php endif; ?>
+        <?php endif; ?>
     <?php endif; ?>
 
 <?php elseif ($page === 'genres'): ?>
