@@ -131,26 +131,46 @@ class BookInventory
             throw new InvalidArgumentException('Select a book and enter a positive copy quantity.');
         }
 
-        $check = $this->conn->prepare(
-            "SELECT COUNT(*)
-             FROM book_copies
-             WHERE book_id = ? AND status = 'Available'"
-        );
-        $check->execute([$bookId]);
-        if ((int) $check->fetchColumn() < 1) {
-            throw new InvalidArgumentException(
-                'Copies can only be added to a book currently listed as available.'
-            );
-        }
-
         try {
             $this->conn->beginTransaction();
-            $insert = $this->conn->prepare(
+            $sourceQuery = $this->conn->prepare(
+                "SELECT b.title, b.publication_year, b.isbn, b.physical_format,
+                        b.description, b.price, b.genre_id
+                 FROM books b
+                 WHERE b.book_id = ?
+                 FOR UPDATE"
+            );
+            $sourceQuery->execute([$bookId]);
+            $source = $sourceQuery->fetch(PDO::FETCH_ASSOC);
+            if (!$source) {
+                throw new InvalidArgumentException(
+                    'Selected book was not found.'
+                );
+            }
+
+            $authorQuery = $this->conn->prepare(
+                'SELECT author_id FROM book_authors WHERE book_id = ?'
+            );
+            $authorQuery->execute([$bookId]);
+            $authorIds = $authorQuery->fetchAll(PDO::FETCH_COLUMN);
+            $insertBook = $this->conn->prepare(
+                "INSERT INTO books (title, publication_year, isbn, physical_format, description, price, genre_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            $insertAuthor = $this->conn->prepare(
+                'INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)'
+            );
+            $insertCopy = $this->conn->prepare(
                 "INSERT INTO book_copies (book_id, status, inventory_date)
                  VALUES (?, 'Available', CURDATE())"
             );
             for ($i = 0; $i < $quantity; $i++) {
-                $insert->execute([$bookId]);
+                $insertBook->execute(array_values($source));
+                $newBookId = (int) $this->conn->lastInsertId();
+                foreach ($authorIds as $authorId) {
+                    $insertAuthor->execute([$newBookId, $authorId]);
+                }
+                $insertCopy->execute([$newBookId]);
             }
             $this->conn->commit();
         } catch (Throwable $e) {
@@ -204,6 +224,80 @@ class BookInventory
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$bookId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function getBookDetails(int $bookId): ?array
+    {
+        $sql = "SELECT b.book_id, b.title, b.publication_year, b.isbn,
+                       b.physical_format, b.description, b.price, g.genre_name
+                FROM books b
+                LEFT JOIN genres g ON g.genre_id = b.genre_id
+                WHERE b.book_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$bookId]);
+        $book = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $book ?: null;
+    }
+
+    private function getCurrentBorrowersByBook(int $bookId): array
+    {
+        $sql = "SELECT br.borrowing_id, br.copy_id, m.member_id,
+                       m.name AS member_name, m.email, br.borrow_date, br.due_date
+                FROM borrowings br
+                INNER JOIN members m ON m.member_id = br.member_id
+                WHERE br.book_id = ?
+                  AND br.return_date IS NULL
+                ORDER BY br.borrow_date";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$bookId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function getAllCopiesDetails(): array
+    {
+        $renewalTableCheck = $this->conn->query(
+            "SELECT COUNT(*)
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE()
+               AND table_name = 'renewal_history'"
+        );
+        $hasRenewalHistory = (int) $renewalTableCheck->fetchColumn() > 0;
+
+        $renewalSelect = '0 AS renewal_count, NULL AS last_renewal_date';
+        $renewalJoin = '';
+        if ($hasRenewalHistory) {
+            $renewalSelect = 'COALESCE(r.renewal_count, 0) AS renewal_count,
+                              r.last_renewal_date';
+            $renewalJoin = "LEFT JOIN (
+                                SELECT br2.copy_id,
+                                       COUNT(rh.renewal_id) AS renewal_count,
+                                       MAX(rh.renewal_date) AS last_renewal_date
+                                FROM borrowings br2
+                                INNER JOIN renewal_history rh
+                                    ON rh.borrowing_id = br2.borrowing_id
+                                WHERE br2.copy_id IS NOT NULL
+                                GROUP BY br2.copy_id
+                            ) r ON r.copy_id = bc.copy_id";
+        }
+
+        $sql = "SELECT b.book_id, b.title, bc.copy_id, bc.status,
+                       bc.inventory_date, br.borrowing_id,
+                       m.name AS member_name, br.borrow_date, br.due_date,
+                       br.return_date, {$renewalSelect}
+                FROM book_copies bc
+                INNER JOIN books b ON b.book_id = bc.book_id
+                LEFT JOIN borrowings br ON br.borrowing_id = (
+                    SELECT MAX(br2.borrowing_id)
+                    FROM borrowings br2
+                    WHERE br2.copy_id = bc.copy_id
+                )
+                LEFT JOIN members m ON m.member_id = br.member_id
+                {$renewalJoin}
+                ORDER BY b.title, bc.copy_id";
+
+        return $this->conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // 3. Show books that are currently borrowed and not returned
@@ -477,10 +571,13 @@ class BookInventory
     {
         $result = '';
         $showAllBooksTable = false;
+        $allCopiesTable = null;
+        $allCopiesTableError = '';
         $availableBooksTable = null;
         $availableBooksTableError = '';
         $availableBooksMessage = '';
-        $copiesForTable = null;
+        $selectedBookDetails = null;
+        $currentBorrowersForBook = null;
         $copiesTableError = '';
         $borrowingsForTable = null;
         $borrowingsTableError = '';
@@ -498,6 +595,12 @@ class BookInventory
 
             if ($action === 'all_books') {
                 $showAllBooksTable = true;
+            } elseif ($action === 'all_copies') {
+                try {
+                    $allCopiesTable = $this->getAllCopiesDetails();
+                } catch (PDOException $e) {
+                    $allCopiesTableError = 'Error showing book copy details: ' . $e->getMessage();
+                }
             } elseif ($action === 'available_books') {
                 try {
                     $availableBooksTable = $this->getAllBooksInventory(true);
@@ -532,9 +635,15 @@ class BookInventory
                     $copiesTableError = 'Please select a valid book.';
                 } else {
                     try {
-                        $copiesForTable = $this->getBookCopies($bookId);
+                        $selectedBookDetails = $this->getBookDetails($bookId);
+                        if ($selectedBookDetails === null) {
+                            throw new InvalidArgumentException('Selected book was not found.');
+                        }
+                        $currentBorrowersForBook = $this->getCurrentBorrowersByBook($bookId);
                     } catch (PDOException $e) {
                         $copiesTableError = 'Error showing book copies: ' . $e->getMessage();
+                    } catch (Throwable $e) {
+                        $copiesTableError = $e->getMessage();
                     }
                 }
             } elseif ($action === 'members_by_book') {
@@ -580,6 +689,12 @@ class BookInventory
         $books = $this->conn->query(
             "SELECT book_id, title FROM books ORDER BY title"
         )->fetchAll(PDO::FETCH_ASSOC);
+        $distinctBooks = $this->conn->query(
+            "SELECT MIN(book_id) AS book_id, title
+             FROM books
+             GROUP BY title
+             ORDER BY title"
+        )->fetchAll(PDO::FETCH_ASSOC);
 
         echo '<h2>Book Inventory Management</h2>';
         echo '<style>
@@ -618,10 +733,32 @@ class BookInventory
         echo '<button type="submit">Show All Books</button>';
         echo '</form>';
 
+        echo '<h3>Show details for every book copy</h3>';
+        echo '<form method="post">';
+        echo '<input type="hidden" name="inventory_action" value="all_copies">';
+        echo '<button type="submit">Show All Copy Statuses and Renewals</button>';
+        echo '</form>';
+
         echo '<h3>2. View all available books</h3>';
         echo '<form method="post">';
         echo '<input type="hidden" name="inventory_action" value="available_books">';
         echo '<button type="submit">View Available Books</button>';
+        echo '</form>';
+
+        echo '<h3>Add Copies to a Book</h3>';
+        echo '<form method="post">';
+        echo '<input type="hidden" name="inventory_action" value="add_copies">';
+        echo '<label>Select Book: <select name="book_id" required>';
+        echo '<option value="">-- Select a book --</option>';
+        foreach ($distinctBooks as $book) {
+            echo '<option value="' . (int)$book['book_id'] . '">'
+                . htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8')
+                . '</option>';
+        }
+        echo '</select></label> ';
+        echo '<label>Number of copies: <input type="number" name="copy_quantity"'
+            . ' min="1" step="1" required></label> ';
+        echo '<button type="submit">Add Copies</button>';
         echo '</form>';
 
         echo '<h3>3. Show all copies of a particular book</h3>';
@@ -653,7 +790,44 @@ class BookInventory
         echo '</form>';
         echo '</section>';
 
-        if ($availableBooksTable !== null) {
+        if ($allCopiesTable !== null) {
+            echo '<hr><h3>All Book Copies</h3>';
+            if (!$allCopiesTable) {
+                echo '<p>No book copies found.</p>';
+            } else {
+                echo '<table border="1" cellpadding="6" cellspacing="0">';
+                echo '<tr><th>Book ID</th><th>Book</th><th>Status</th>';
+                echo '<th>Inventory Date</th><th>Latest Member</th><th>Borrow Date</th>';
+                echo '<th>Due Date</th><th>Return Date</th><th>Renewed</th>';
+                echo '<th>Last Renewal Date</th></tr>';
+                foreach ($allCopiesTable as $copy) {
+                    $renewalCount = (int) $copy['renewal_count'];
+                    $renewalStatus = $renewalCount > 0
+                        ? 'Yes (' . $renewalCount . ')'
+                        : 'No';
+                    echo '<tr>';
+                    foreach ([
+                        $copy['book_id'],
+                        $copy['title'],
+                        $copy['status'],
+                        $copy['inventory_date'] ?? 'Not recorded',
+                        $copy['member_name'] ?? 'N/A',
+                        $copy['borrow_date'] ?? 'N/A',
+                        $copy['due_date'] ?? 'N/A',
+                        $copy['return_date'] ?? 'Not returned',
+                        $renewalStatus,
+                        $copy['last_renewal_date'] ?? 'N/A'
+                    ] as $value) {
+                        echo '<td>' . htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . '</td>';
+                    }
+                    echo '</tr>';
+                }
+                echo '</table>';
+            }
+        } elseif ($allCopiesTableError !== '') {
+            echo '<hr><h3>Inventory Results</h3>';
+            echo '<p>' . htmlspecialchars($allCopiesTableError, ENT_QUOTES, 'UTF-8') . '</p>';
+        } elseif ($availableBooksTable !== null) {
             echo '<hr><h3>Available Books</h3>';
             if ($availableBooksMessage !== '') {
                 echo '<p>' . htmlspecialchars($availableBooksMessage, ENT_QUOTES, 'UTF-8') . '</p>';
@@ -662,7 +836,7 @@ class BookInventory
                 echo '<p>No books are currently available.</p>';
             } else {
                 echo '<table border="1" cellpadding="6" cellspacing="0">';
-                echo '<tr><th>Book ID</th><th>Title</th><th>Publication Year</th><th>ISBN</th><th>Physical Format</th><th>Genre</th><th>Total Copies</th><th>Available Copies</th><th>Add Copies</th></tr>';
+                echo '<tr><th>Book ID</th><th>Title</th><th>Publication Year</th><th>ISBN</th><th>Physical Format</th><th>Genre</th></tr>';
                 foreach ($availableBooksTable as $book) {
                     echo '<tr>';
                     foreach ([
@@ -671,17 +845,10 @@ class BookInventory
                         $book['publication_year'] ?? 'N/A',
                         $book['isbn'] ?? 'N/A',
                         $book['physical_format'] ?? 'N/A',
-                        $book['genre_name'] ?? 'N/A',
-                        $book['total_copies'],
-                        $book['available_copies']
+                        $book['genre_name'] ?? 'N/A'
                     ] as $value) {
                         echo '<td>' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '</td>';
                     }
-                    echo '<td><form method="post" style="margin:0">';
-                    echo '<input type="hidden" name="inventory_action" value="add_copies">';
-                    echo '<input type="hidden" name="book_id" value="' . (int)$book['book_id'] . '">';
-                    echo '<input type="number" name="copy_quantity" min="1" value="1" required>';
-                    echo ' <button type="submit">Add</button></form></td>';
                     echo '</tr>';
                 }
                 echo '</table>';
@@ -695,14 +862,13 @@ class BookInventory
                 echo '<p>No books are currently borrowed.</p>';
             } else {
                 echo '<table border="1" cellpadding="6" cellspacing="0">';
-                echo '<tr><th>Borrowing ID</th><th>Book ID</th><th>Book Title</th><th>Copy ID</th><th>Member ID</th><th>Member Name</th><th>Borrow Date</th><th>Due Date</th></tr>';
+                echo '<tr><th>Borrowing ID</th><th>Book ID</th><th>Book Title</th><th>Member ID</th><th>Member Name</th><th>Borrow Date</th><th>Due Date</th></tr>';
                 foreach ($borrowingsForTable as $row) {
                     echo '<tr>';
                     foreach ([
                         $row['borrowing_id'],
                         $row['book_id'],
                         $row['title'],
-                        $row['copy_id'] ?? 'N/A',
                         $row['member_id'],
                         $row['member_name'],
                         $row['borrow_date'],
@@ -717,24 +883,55 @@ class BookInventory
         } elseif ($borrowingsTableError !== '') {
             echo '<hr><h3>Inventory Results</h3>';
             echo '<p>' . htmlspecialchars($borrowingsTableError, ENT_QUOTES, 'UTF-8') . '</p>';
-        } elseif ($copiesForTable !== null) {
+        } elseif ($selectedBookDetails !== null) {
             echo '<hr><h3>Inventory Results</h3>';
-            if (!$copiesForTable) {
-                echo '<p>No copies found for this book.</p>';
-            } else {
-                echo '<p>Book: ' . htmlspecialchars((string)$copiesForTable[0]['title'], ENT_QUOTES, 'UTF-8') . '</p>';
-                echo '<p>Book ID: ' . (int)$copiesForTable[0]['book_id'] . '</p>';
+            $book = $selectedBookDetails;
+            echo '<table border="1" cellpadding="6" cellspacing="0">';
+            echo '<tr><th>Book ID</th><th>Title</th><th>Publication Year</th><th>ISBN</th>'
+                . '<th>Format</th><th>Genre</th><th>Price</th><th>Description</th></tr>';
+            echo '<tr>';
+            foreach ([
+                $book['book_id'],
+                $book['title'],
+                $book['publication_year'] ?? 'N/A',
+                $book['isbn'] ?? 'N/A',
+                $book['physical_format'] ?? 'N/A',
+                $book['genre_name'] ?? 'N/A',
+                $book['price'] === null ? 'N/A' : 'Rs. ' . number_format((float)$book['price'], 2),
+                $book['description'] ?? 'N/A'
+            ] as $value) {
+                echo '<td>' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '</td>';
+            }
+            echo '</tr></table>';
+
+            $currentBorrowerCount = count($currentBorrowersForBook);
+            echo '<h4>Currently Borrowed</h4>';
+            echo '<p>Currently borrowed by ' . $currentBorrowerCount . ' member'
+                . ($currentBorrowerCount === 1 ? '' : 's') . '.</p>';
+            if ($currentBorrowerCount > 0) {
                 echo '<table border="1" cellpadding="6" cellspacing="0">';
-                echo '<tr><th>Copy ID</th><th>Status</th><th>Inventory Date</th></tr>';
-                foreach ($copiesForTable as $copy) {
+                echo '<tr><th>Borrowing ID</th><th>Copy ID</th><th>Member ID</th>'
+                    . '<th>Member Name</th><th>Email</th><th>Borrow Date</th><th>Due Date</th></tr>';
+                foreach ($currentBorrowersForBook as $borrower) {
                     echo '<tr>';
-                    echo '<td>' . (int)$copy['copy_id'] . '</td>';
-                    echo '<td>' . htmlspecialchars((string)$copy['status'], ENT_QUOTES, 'UTF-8') . '</td>';
-                    echo '<td>' . htmlspecialchars((string)($copy['inventory_date'] ?? 'Not recorded'), ENT_QUOTES, 'UTF-8') . '</td>';
+                    foreach ([
+                        $borrower['borrowing_id'],
+                        $borrower['copy_id'] ?? 'N/A',
+                        $borrower['member_id'],
+                        $borrower['member_name'],
+                        $borrower['email'] ?? 'N/A',
+                        $borrower['borrow_date'],
+                        $borrower['due_date']
+                    ] as $value) {
+                        echo '<td>' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '</td>';
+                    }
                     echo '</tr>';
                 }
                 echo '</table>';
+            } else {
+                echo '<p>No members currently have this book borrowed.</p>';
             }
+
         } elseif ($copiesTableError !== '') {
             echo '<hr><h3>Inventory Results</h3>';
             echo '<p>' . htmlspecialchars($copiesTableError, ENT_QUOTES, 'UTF-8') . '</p>';
@@ -818,13 +1015,12 @@ class BookInventory
                 echo '<p>No lost books found.</p>';
             } else {
                 echo '<table border="1" cellpadding="6" cellspacing="0">';
-                echo '<tr><th>Book ID</th><th>Book Title</th><th>Copy ID</th><th>Inventory Date</th><th>Borrowing ID</th><th>Member ID</th><th>Member Name</th><th>Borrow Date</th><th>Due Date</th><th>Recorded Lost Fee</th></tr>';
+                echo '<tr><th>Book ID</th><th>Book Title</th><th>Inventory Date</th><th>Borrowing ID</th><th>Member ID</th><th>Member Name</th><th>Borrow Date</th><th>Due Date</th><th>Recorded Lost Fee</th></tr>';
                 foreach ($lostBooksForTable as $book) {
                     echo '<tr>';
                     foreach ([
                         $book['book_id'],
                         $book['title'],
-                        $book['copy_id'],
                         $book['inventory_date'] ?? 'Not recorded',
                         $book['borrowing_id'] ?? 'N/A',
                         $book['member_id'] ?? 'N/A',
@@ -853,8 +1049,13 @@ class BookInventory
                     echo '<p>No books found.</p>';
                 } else {
                     echo '<table border="1" cellpadding="6" cellspacing="0">';
-                    echo '<tr><th>Book ID</th><th>Title</th><th>Publication Year</th><th>ISBN</th><th>Physical Format</th><th>Genre</th><th>Total Copies</th><th>Available Copies</th><th>Borrowed Copies</th><th>Lost Copies</th><th>First Inventory Date</th></tr>';
+                    echo '<tr><th>Book ID</th><th>Title</th><th>Publication Year</th><th>ISBN</th><th>Physical Format</th><th>Genre</th><th>Status</th><th>First Inventory Date</th></tr>';
                     foreach ($books as $book) {
+                        $status = (int)$book['available_copies'] > 0
+                            ? 'Available'
+                            : ((int)$book['borrowed_copies'] > 0
+                                ? 'Borrowed'
+                                : ((int)$book['lost_copies'] > 0 ? 'Lost' : 'No copies'));
                         echo '<tr>';
                         foreach ([
                             $book['book_id'],
@@ -863,10 +1064,7 @@ class BookInventory
                             $book['isbn'] ?? 'N/A',
                             $book['physical_format'] ?? 'N/A',
                             $book['genre_name'] ?? 'N/A',
-                            $book['total_copies'],
-                            $book['available_copies'],
-                            $book['borrowed_copies'],
-                            $book['lost_copies'],
+                            $status,
                             $book['first_inventory_date'] ?? 'Not recorded'
                         ] as $value) {
                             echo '<td>' . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '</td>';
