@@ -17,7 +17,7 @@ foreign key(parent_genre_id)references genres(genre_id));*/
 /*create table books(book_id int auto_increment primary key,
 title varchar(50)not null,
 publication_year year,
-isbn varchar(20),
+isbn varchar(20)unique,
 physical_format varchar(50),
 description text,
 price decimal(10.2)not null default 0);*/
@@ -247,26 +247,35 @@ SET FOREIGN_KEY_CHECKS = 1;*/
 
 #update  borrowings set  due_date = '2026-10-27' where  borrowing_id = 2;
 
--- Existing databases need this migration; copies of the same book share an ISBN.
-SET @isbn_unique_index_exists = (
-    SELECT COUNT(*)
-    FROM information_schema.statistics
-    WHERE table_schema = DATABASE()
-      AND table_name = 'books'
-      AND index_name = 'isbn'
-      AND non_unique = 0
-);
-SET @remove_isbn_unique_index = IF(
-    @isbn_unique_index_exists > 0,
-    'ALTER TABLE books DROP INDEX `isbn`',
-    'SELECT ''Unique ISBN index is already absent'' AS result'
-);
-PREPARE remove_isbn_unique_index FROM @remove_isbn_unique_index;
-EXECUTE remove_isbn_unique_index;
-DEALLOCATE PREPARE remove_isbn_unique_index;
+/*SELECT f.fee_id, f.borrowing_id
+FROM fees f
+INNER JOIN borrowings br
+ON f.borrowing_id = br.borrowing_id;*/
 
+/*SELECT
+    f.fee_id,
+    f.borrowing_id,
+    m.member_id,
+    m.name
+FROM fees f
+INNER JOIN borrowings br
+ON f.borrowing_id = br.borrowing_id
+INNER JOIN members m
+ON br.member_id = m.member_id;*/
 
-
+/*    f.fee_id,
+    f.borrowing_id,
+    m.member_id,
+    m.name,
+    b.title,
+    f.amount
+FROM fees f
+INNER JOIN borrowings br
+ON f.borrowing_id = br.borrowing_id
+INNER JOIN members m
+ON br.member_id = m.member_id
+INNER JOIN books b
+ON br.book_id = b.book_id;  */
 
 
 
