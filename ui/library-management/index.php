@@ -544,13 +544,13 @@ if ($action === 'edit' && (isset($_GET['id']) || isset($_POST['id']))) {
         <p>No books found.</p>
     <?php else: ?>
         <table border="1" cellpadding="6" cellspacing="0">
-            <tr><th>Book ID</th><th>Title</th><th>Authors</th><th>Genre</th><th>Year</th><th>ISBN</th><th>Price</th><th>Total Copies</th><th>Available Copies</th><th>Actions</th></tr>
+            <tr><th>Book ID</th><th>Title</th><th>Authors</th><th>Genre</th><th>Year</th><th>ISBN</th><th>Price</th><th>Actions</th></tr>
             <?php foreach ($bookRows as $bookRow): ?>
                 <tr>
                     <td><?= e($bookRow['book_id']) ?></td><td><?= e($bookRow['title']) ?></td>
                     <td><?= e($bookRow['author_names'] ?? 'Not assigned') ?></td><td><?= e($bookRow['genre_name'] ?? 'Not assigned') ?></td>
                     <td><?= e($bookRow['publication_year']) ?></td><td><?= e($bookRow['isbn']) ?></td><td><?= e($bookRow['price']) ?></td>
-                    <td><?= e($bookRow['total_copies']) ?></td><td><?= e($bookRow['available_copies']) ?></td>
+                   
                     <td>
                         <a href="?page=books&action=edit&id=<?= e($bookRow['book_id']) ?>">Edit</a>
                         <form method="get" action="index.php" style="display:inline">
