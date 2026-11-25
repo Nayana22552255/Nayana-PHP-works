@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Counter App</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        
+        <div class="container">
+        <h1>Counter App</h1>
+
+        <span id="count">Count 0</span>   <!--display the current count-->
+        <br><br>
+
+        <!--Add three buttons-->
+        <button class="increase" onclick="increase()">Increase</button>
+        <button class="decrease" onclick="decrease()">Decrease</button>
+        <button class=" reset"   onclick="reset()">Reset</button>
+
+        </div>
+        <script>
+            let count = 0;
+
+            let display=document.getElementById("count"); <!--select the html element whose count id is count-->
+
+            display.textContent = count;  <!--changes the text displayed inside that element-->
+
+            /*function for first button*/
+            function increase()
+            {
+                count++;
+
+                display.textContent=count;  <!--update the displayed number-->
+            }
+
+            function decrease()
+            {
+                count--;
+                display.textContent=count;
+            }
+
+            function reset()
+            {
+                count = 0;
+                display.textContent=count;
+            }
+        </script>
+      
+    </body>
+    
+</html>

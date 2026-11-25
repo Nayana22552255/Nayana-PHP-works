@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html class="overscroll-none">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>College Dashboard</title>
+
+        <!--Tailwind CSS-->
+        <link rel="stylesheet" href="style.css">
+        <script src="script.js" defer></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    </head>
+
+
+    <body class="bg-slate-100  min-h-screen">
+
+        <!--Mobile Overlay-->
+        <div id="sidebarOverlay"
+                class="fixed  inset-0 bg-black/50  z-30  hidden  md:hidden"
+                onclick="toggleSidebar()"></div>
+
+        <!--side bar-->
+        <aside id="sidebar"
+                class="fixed top-0 left-0 z-40 w-80 h-screen
+                bg-slate-900 text-white -translate-x-full md:translate-x-0
+                transition-transform duration-300">
+
+                    <!--logo-->
+                    <div class="h-40 flex items-center justify-center border-b border-slate-700">
+                        <h1 class="text-2xl fond-bold text-white">
+                            <i class="fa-solid fa-graduation-cap text-blue-400 mr-2"></i>
+                            Yonsei University
+                        </h1>
+
+
+                    </div>
+
+                    <!--side bar menu-->
+                    <div class="p-4">
+                        <p class="text-xs uppercase text-slate-400 font-semibold mb-4">Main Menu</p>
+
+                        <nav class="space-y-2">
+                            <!--dashboard-->
+                            <a href="#dashboardSection"
+                                class="flex items-center gap-3 px-4 py-3
+                                        rounded-lg  text-white hover:bg-blue-700 transition">
+                                <i class="fa-solid fa-house w-5"></i>
+                                <span>Dashboard</span>
+
+                            </a>
+
+                            <!--users-->
+                            <a href="users.html"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg
+                               text-white hover:bg-blue-700 transition">
+                                <i class="fa-solid fa-users w-5"></i>
+                                <span>User Management</span>
+
+                            </a>
+
+                            <!--courses-->
+                            <a href="course.html"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                                text-white hover:bg-blue-700 transition">
+                                <i class="fa-solid fa-book-open w-5"></i>
+                                <span>Courses</span>
+
+                            </a>
+
+                            <!--Departments-->
+                            <a href="departments.html"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg 
+                                text-white hover:bg-blue-700 transition">
+                                <i class="fa-solid fa-building w-5"></i>
+                                <span>Departments</span>
+
+                            </a>
+
+                            <!--College profile-->
+                            <a href="#aboutCollege"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg
+                                text-white hover:bg-blue-700 transition">
+                                <i class="fa-solid fa-school w-5"></i>
+                                <span>College profile</span>
+
+                            </a>
+
+                        </nav>
+
+                    </div>
+
+                    <!--Logout-->
+                    <div class="absolute bottom-5 left-0 w-full px-4">
+                        <button onclick="logout()"
+                                class="w-full flex items=center gap-3 px-4 py-3 rounded-lg
+                                text-red-400  hover:bd-red-500
+                                hover:text-white transition">
+                                <i class="fa-solid fa-right-from-bracket w-5"></i>
+                                <span>Logout</span>
+
+                        </button>
+
+                    </div>
+                    
+        </aside>
+
+        <!--Main contents-->
+        <div class="min-h-screen md:ml-80">
+
+                <!--Top Navbar-->
+                <nav class="sticky top-1 z-20 bg-white  shadow-sm  border-b border-slate-200
+                    px-6 md:px-8 py-4">
+
+                    <div class="flex items-center justify-between">
+                        <!--left side-->
+                        <div class="flex items-center gap-4">
+                            <!--mobile menu button-->
+                            <button onclick="toggleSidebar()"
+                                    class="md:hidden text-slate-700 text-xl p-2 rounded-lg">
+                                    <i class="fa-solid fa-bars"></i>
+
+                            </button>
+
+                            <!--dashboard name-->
+                            <div>
+                                <h1 class="text-xl md:text-2xl  font-bold text-slate-800">
+                                    Admin Dashboard
+                                </h1>
+                                <p class="text-xs  text-slate-700">
+                                        Wlecome to College Management System
+                                </p>
+                            </div>
+
+                        </div>
+                        <!--right side-->
+                        <div class="flex item-center gap-4">
+                            <!--notification-->
+                            <button onclick="alert('No new notifications')"
+                            class="relative text-slate-600
+                                    hover:text-blue-600 text-xl"> 
+                                <i class="fa-solid fa-bell"></i>
+
+                                <span class="absolute -top-1 -right-2
+                                        bg-red-500 text-white
+                                        text-xs rounded-full
+                                        w-4 h-4 flex items-center
+                                        justify-center">
+                                    2
+                                </span>
+                                
+                            </button>
+
+                            <!--Admin Profile-->
+                            <div class="flex items-center gap-2">
+                                <div class="w-10 h-10 rounded-full
+                                        bg-blue-600 text-white 
+                                        flex items-center justify-center">
+                                        <i class="fa-solid fa-user"></i>
+
+                                </div>
+
+                                <div class="hidden sm:block">
+                                    <p class="text-sm  font-semibold text-slate-800">Admin</p>
+                                    <p class="text-xs text-slate-500">Administrator</p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                 
+                </nav>
+
+                <!--Existing dashboard contents-->
+                <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-30 max-w-7xl">
+                  <!--dashboard Heading-->
+                <div id="dashboardSection"
+                     class="mb-15 mt-15">
+
+                     <h2 class="text-3xl font-bold text-slate-800">
+                            Dashboard Overview
+                     </h2>
+                     <p class="text-slate-500 mt-2">
+                        View Students, Teachers and staffs Totals
+                        along with your college information
+                     </p>
+
+                </div>
+
+                <!--dashboad card-->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                    <!--students-->
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white
+                                relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                                hover:-translate-y-1 hover:shadow-2xl">
+                                <i class="fa-solid fa-user-graduate text-2xl"></i>
+                                <h3 class="mt-4 text-lg font-medium">Students</h3>
+                                <p id="studentCount" class="text-3xl font-bold mt-2">0</p>
+                                <p class="text-sm mt-1">Total Registered Students</p>
+
+                    </div>
+
+                    <!--teachers-->
+                    <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white
+                                relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                                hover:-translate-y-1 hover:shadow-2xl">
+                                <i class="fa-solid fa-chalkboard-user text-2xl"></i>
+                                <h3 class="mt-4 text-lg font-medium">Teachers</h3>
+                                <p id="teacherCount" class="text-3xl font-bold mt-2">0</p>
+                                <p class="text-sm mt-1">Total Teachers</p>
+
+
+                    </div>
+                    <!--staff-->
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 text-white
+                                relative rounded-2xl p-6 h-50 shadow-lg  transition-all duration-300 ease-in-out
+                                hover:-translate-y-1 hover:shadow-2xl">
+                                <i class="fa-solid fa-user-shield text-2xl"></i>
+                                <h3 class="mt-4 text-lg font-medium">Staffs</h3>
+                                <p id="staffCount" class="text-3xl font-bold mt-2">0</p>
+                                <p class="text-sm mt-1">Total Staffs</p>
+
+
+                    </div>
+                    <!--total users-->
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-700 text-white
+                                relative rounded-2xl p-6 h-50 shadow-lg transition-all duration-300 ease-in-out
+                                hover:-translate-y-1 hover:shadow-2xl">
+                                <i class="fa-solid fa-user text-2xl"></i>
+                                <h3 class="mt-4 text-lg font-medium">Total Users</h3>
+                                <p id="totalUsers" class="text-3xl font-bold mt-2">0</p>
+                                <p class="text-sm mt-1">All Registered Users</p>
+
+
+                    </div>
+
+
+                </div>
+
+                <!--College profile Section-->
+                <section id="aboutCollege"
+                    class="mb-20 mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-2xl">
+
+                    <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+                        <img src="image.jpg"
+                             alt="Yonsei University campus"
+                             class="h-50 w-50 shrink-0 rounded-4xl border-2 border-blue-100 object-cover shadow-md transition-transform duration-300 hover:scale-105">
+
+                        <div class="text-center sm:text-left">
+                            <h2 class="text-2xl font-bold text-slate-800">
+                                Yonsei University
+                            </h2>
+                            <span class="mt-3 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                Active Institution
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr class="my-6 border-slate-200">
+
+                    <h3 class="mb-3 text-xl font-bold text-slate-800">
+                        About Our College
+                    </h3>
+                    <p class="leading-7 text-slate-600">
+                        Yonsei University is committed to quality higher education,
+                        academic excellence, practical learning, and the personal
+                        growth of every student.
+                    </p>
+
+                    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">Location</p>
+                                <p class="mt-1 text-sm text-slate-600">Yonsei, Busan, South Korea</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">Phone</p>
+                                <a href="tel:9895443275" class="mt-1 block text-sm text-slate-600 hover:text-blue-600">
+                                    9895443275
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+                                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-800">Email</p>
+                                <a href="mailto:yousei@email.com" class="mt-1 block break-all text-sm text-slate-600 hover:text-blue-600">
+                                    yousei@email.com
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                
+                
+                </main>
+
+        </div>
+
+    </body>
+</html>

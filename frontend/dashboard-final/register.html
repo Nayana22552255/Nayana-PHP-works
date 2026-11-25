@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en" class="overscroll-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Registration Page</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-5xl min-h-7xl flex flex-col md:flex-row overflow-hidden rounded-2xl">
+
+        <!-- LEFT SIDE -->
+        <div class="hidden md:flex md:w-1/2 bg-blue-700 text-white flex-col
+                    justify-center items-center p-10 text-center">
+
+            <!-- Icon -->
+            <div class="mb-8 bg-white/20 p-6 rounded-2xl">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="w-16 h-16"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="1.5">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 14l9-5-9-5-9 5 9 5z"/>
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 14l6.16-3.42A12 12 0 0118 20H6a12 12 0 01-.16-9.42L12 14z"/>
+
+                </svg>
+
+            </div>
+
+            <!-- Heading -->
+            <h1 class="text-4xl font-bold mb-4">
+                Welcome to College Portal
+            </h1>
+
+            <p class="text-blue-100 text-lg max-w-md leading-relaxed">
+                Join our academic community and access your
+                college dashboard. Manage your profile,
+                academic activities and more in one place.
+            </p>
+
+            <!-- Features -->
+            <div class="mt-10 space-y-5 text-left">
+
+                <div class="flex items-center gap-3">
+                    <span class="bg-white/20 p-2 rounded-lg">✓</span>
+                    <span>Easy account management</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="bg-white/20 p-2 rounded-lg">✓</span>
+                    <span>Access college information</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="bg-white/20 p-2 rounded-lg">✓</span>
+                    <span>Stay connected with campus</span>
+                </div>
+
+            </div>
+
+            <p class="mt-16 text-sm text-blue-200">
+                © 2026 College Dashboard. All rights reserved.
+            </p>
+
+        </div>
+
+
+        <!-- RIGHT SIDE - REGISTRATION FORM -->
+
+        <div class="w-full md:w-1/2 flex items-center justify-center p-10 sm:p-10 md:py-0">
+
+            <div class="bg-white w-full max-w-3xl md:h-full  p-8 rounded-2xl shadow-2xl">
+
+                <h2 class="text-3xl font-bold text-center
+                           text-blue-700 mb-2">
+                    Create Account
+                </h2>
+
+                <p class="text-gray-500 text-center mb-8">
+                    Register to access College Dashboard
+                </p>
+
+
+                <!-- Registration Form -->
+
+                <form id="registerForm">
+
+                    <!-- Name -->
+                    <div class="mb-4">
+
+                        <label class="block text-gray-700
+                                      font-medium mb-2">
+                            Name
+                        </label>
+
+                        <input type="text"
+                               id="name"
+                               required
+                               placeholder="Enter your name"
+                               class="w-full border border-gray-300
+                                      rounded-lg px-4 py-3
+                                      outline-none focus:ring-2
+                                      focus:ring-blue-500">
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="mb-4">
+
+                        <label class="block text-gray-700
+                                      font-medium mb-2">
+                            Email
+                        </label>
+
+                        <input type="email"
+                               id="email"
+                               placeholder="Enter your email"
+                               required
+                               class="w-full border border-gray-300
+                                      rounded-lg px-4 py-3
+                                      outline-none focus:ring-2
+                                      focus:ring-blue-500">
+
+                    </div>
+
+
+                    <!-- Role -->
+                    <div class="mb-4">
+
+                        <label class="block text-gray-700
+                                      font-medium mb-2">
+                            Role
+                        </label>
+
+                        <select id="role"
+                                required
+                                class="w-full border border-gray-300
+                                       rounded-lg px-4 py-3
+                                       outline-none focus:ring-2
+                                       focus:ring-blue-500">
+
+                            <option value="">Select Role</option>
+                            <option value="Teacher">Teacher</option>
+                            <option value="Student">Student</option>
+                            <option value="Staff">Staff</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Password -->
+                    <div class="mb-6">
+
+                        <label class="block text-gray-700
+                                      font-medium mb-2">
+                            Password
+                        </label>
+
+                        <input type="password"
+                               id="password"
+                               placeholder="Enter your password"
+                               required
+                               minlength="6"
+                               maxlength="12"
+                               class="w-full border border-gray-300
+                                      rounded-lg px-4 py-3
+                                      outline-none focus:ring-2
+                                      focus:ring-blue-500">
+
+                    </div>
+
+
+                    <!-- Buttons -->
+                    <div class="flex gap-4">
+
+                        <button type="submit"
+                                class="flex-1 bg-blue-600 text-white
+                                       py-3 rounded-lg font-semibold
+                                       hover:bg-blue-700 transition">
+                            Register
+                        </button>
+
+                        <a href="login.html"
+                           class="flex-1 text-center bg-gray-500
+                                  text-white py-3 rounded-lg
+                                  font-semibold hover:bg-gray-600
+                                  transition">
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

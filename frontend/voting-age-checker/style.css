@@ -1,0 +1,61 @@
+body {
+    display: flex;
+    width: 100vh;
+    height: auto;
+    background-color: white;
+    font-family: 'Franklin Gothic Medium';
+    text-align: center;
+    padding-top: 50px;
+    padding-left: 500px;
+    padding-bottom: 100px;
+   
+
+}
+
+.container {
+    background-color: white;
+    width: 400px;
+    margin: 100px auto; 
+    padding: 100px;
+    border-radius: 12px;
+    box-shadow: 0 5px rgba(0,0,0,0.3);
+}
+
+h1 {
+    color: darkslateblue;
+    padding: 10px;
+    font-weight: bolder;
+}
+
+p {
+    color: black;
+    font-size: 20px;
+    
+}
+
+input {
+    width: 80%;
+    padding: 12px;
+    border: 2px solid black;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button {
+    background-color: darkslateblue;
+    color: white;
+    padding: 12px 20px;
+    border: 2px solid black;
+    border-radius: 6px;
+    font-family: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: darkolivegreen;
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 18px;
+}

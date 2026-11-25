@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="overscroll-none"> 
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+     <script src="script.js" defer></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!--course pricing section-->
+                
+<!-- Course Pricing Section -->
+
+<section id="coursePricing"
+         class="bg-slate-50 p-6 md:p-8 rounded-2xl
+                shadow-sm mt-20 ">
+
+    <!-- Heading -->
+    <div class="relative flex flex-col items-center text-center mb-20">
+
+        <div>
+            <h2 class="text-4xl text-center font-bold text-slate-800">
+                Course Management
+            </h2>
+
+            <p class="text-2xl text-slate-500 mt-2">
+                Explore our academic programmes and course fees.
+            </p>
+        </div>
+
+        <span class="mt-4 bg-blue-100 text-blue-700
+                     px-4 py-2 rounded-full text-sm font-semibold
+                     sm:absolute sm:right-0 sm:bottom-0 sm:mt-0">
+            4 Available Courses
+        </span>
+
+    </div>
+
+
+    <!-- Course Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2
+                lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+
+
+        <!-- BCA Card -->
+        <div class="bg-white border-t-4 border-blue-500
+                    border-x border-b border-slate-500
+                    rounded-4xl p-6 min-h-[500px]
+                    shadow-sm hover:shadow-xl
+                    hover:-translate-y-2
+                    transition-all duration-300
+                    flex flex-col">
+
+            <div class="w-14 h-14 bg-blue-100 text-blue-600
+                        rounded-xl flex items-center
+                        justify-center text-2xl mb-5">
+
+                <i class="fa-solid fa-laptop-code"></i>
+
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800">
+                BCA
+            </h3>
+
+            <p class="text-slate-600 text-sm mt-2 leading-6">
+                Bachelor of Computer Applications
+            </p>
+
+            <p class="text-slate-600 text-sm mt-4 leading-6">
+                Build a foundation in programming, web development, databases, and software design. Develop practical skills to create and maintain modern applications.
+            </p>
+
+            <div class="mt-auto pt-6">
+
+                <p class="text-3xl font-bold text-blue-600">
+                    ₹35,000
+                </p>
+
+                <p class="text-sm text-slate-600 mt-1">
+                    Per Year
+                </p>
+
+                <button onclick="alert('BCA Course Details')"
+                        class="w-full mt-5 bg-blue-600 text-white
+                               py-3 rounded-lg font-semibold
+                               hover:bg-blue-700 transition">
+                    View Details
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- B.Com Card -->
+        <div class="bg-white border-t-4 border-emerald-500
+                    border-x border-b border-slate-500
+                    rounded-4xl p-6 min-h-[500px]
+                    shadow-sm hover:shadow-xl
+                    hover:-translate-y-2
+                    transition-all duration-300
+                    flex flex-col">
+
+            <div class="w-14 h-14 bg-emerald-100
+                        text-emerald-600 rounded-xl
+                        flex items-center justify-center
+                        text-2xl mb-5">
+
+                <i class="fa-solid fa-calculator"></i>
+
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800">
+                B.Com
+            </h3>
+
+            <p class="text-slate-600 text-sm mt-2 leading-6">
+                Bachelor of Commerce
+            </p>
+
+            <p class="text-slate-600 text-sm mt-4 leading-6">
+                Learn the essentials of accounting, finance, taxation, and business management. Explore how organizations plan, analyze, and make informed decisions.
+            </p>
+
+            <div class="mt-auto pt-6">
+
+                <p class="text-3xl font-bold text-emerald-600">
+                    ₹30,000
+                </p>
+
+                <p class="text-sm text-slate-400 mt-1">
+                    Per Year
+                </p>
+
+                <button onclick="alert('B.Com Course Details')"
+                        class="w-full mt-5 bg-emerald-600
+                               text-white py-3 rounded-lg
+                               font-semibold hover:bg-emerald-700
+                               transition">
+                    View Details
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- BA English Card -->
+        <div class="bg-white border-t-4 border-purple-500
+                    border-x border-b border-slate-500
+                    rounded-4xl p-6 min-h-[500px]
+                    shadow-sm hover:shadow-xl
+                    hover:-translate-y-2
+                    transition-all duration-300
+                    flex flex-col">
+
+            <div class="w-14 h-14 bg-purple-100
+                        text-purple-600 rounded-xl
+                        flex items-center justify-center
+                        text-2xl mb-5">
+
+                <i class="fa-solid fa-book-open"></i>
+
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800">
+                BA English
+            </h3>
+
+            <p class="text-slate-600 text-sm mt-2 leading-6">
+                Bachelor of Arts in English
+            </p>
+
+            <p class="text-slate-600 text-sm mt-4 leading-6">
+                Explore literature, language, and creative expression across a range of texts. Strengthen your writing, communication, and critical-thinking skills.
+            </p>
+
+            <div class="mt-auto pt-6">
+
+                <p class="text-3xl font-bold text-purple-600">
+                    ₹25,000
+                </p>
+
+                <p class="text-sm text-slate-600 mt-1">
+                    Per Year
+                </p>
+
+                <button onclick="alert('BA English Course Details')"
+                        class="w-full mt-5 bg-purple-600
+                               text-white py-3 rounded-lg
+                               font-semibold hover:bg-purple-700
+                               transition">
+                    View Details
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- MSc Card -->
+        <div class="bg-white border-t-4 border-orange-500
+                    border-x border-b border-slate-500
+                    rounded-4xl p-6 min-h-[500px]
+                    shadow-sm hover:shadow-xl
+                    hover:-translate-y-2
+                    transition-all duration-300
+                    flex flex-col">
+
+            <div class="w-14 h-14 bg-orange-100
+                        text-orange-600 rounded-xl
+                        flex items-center justify-center
+                        text-2xl mb-5">
+
+                <i class="fa-solid fa-microchip"></i>
+
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800">
+                MSc CS
+            </h3>
+
+            <p class="text-slate-600 text-sm mt-2 leading-6">
+                Master of Computer Science
+            </p>
+
+            <p class="text-slate-600 text-sm mt-4 leading-6">
+                Study advanced computing topics such as algorithms, data systems, artificial intelligence, and software engineering. Prepare to solve complex technical problems and build scalable solutions.
+            </p>
+
+            <div class="mt-auto pt-6">
+
+                <p class="text-3xl font-bold text-orange-600">
+                    ₹45,000
+                </p>
+
+                <p class="text-sm text-slate-600 mt-1">
+                    Per Year
+                </p>
+
+                <button onclick="alert('MSc CS Course Details')"
+                        class="w-full mt-5 bg-orange-600
+                               text-white py-3 rounded-lg
+                               font-semibold hover:bg-orange-700
+                               transition">
+                    View Details
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

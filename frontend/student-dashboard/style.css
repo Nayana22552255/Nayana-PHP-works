@@ -1,0 +1,63 @@
+body{
+    background-color: lightgray;
+    font-family: Arial,sans-serif;
+    margin:0px;
+    padding:20px;
+}
+
+h1{
+    text-align: center;
+    color: darkblue;
+}
+
+.container{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 20px;
+
+    max-width: 900px;
+    margin: 30px auto;
+}
+
+.card{
+    background-color: white;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+}
+.card:hover{
+    background-color: lightblue;
+    transform: translateY(-5px);
+}
+.crad h2{
+    color: blue;
+}
+button{
+    background-color: blue;
+    color: white;
+    padding:10px 20px;
+    border: none;
+    border-radius: 10px;
+
+    transition: 0.3s;
+}
+
+button:hover{
+    background-color: green;
+    cursor: pointer;
+}
+
+.card{
+    border: 2px solid orange;
+}
+
+.card h2::after{
+    content: "⭐";
+    color: orange;
+}
+
+@media screen and(max-width:1024px){
+    .container{
+        grid-template-columns: 1fr;
+    }
+}
